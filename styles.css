@@ -376,5 +376,22 @@ body {
     height: 40px;
   }
 }
+.brand {
+  display: flex;
+  align-items: center;
+}
+
+/* Single combined logo */
+.brand-image {
+  height: 40px;      /* perfect for mobile */
+  width: auto;
+  display: block;
+}
+@media (min-width: 900px) {
+  .brand-image {
+    height: 48px;   /* slightly larger on desktop */
+  }
+}
+
 
 
