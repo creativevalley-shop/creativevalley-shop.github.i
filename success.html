@@ -1,36 +1,60 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Order Received</title>
+  <meta charset="UTF-8">
+  <title>Complete Payment</title>
   <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
 
 <header>
-  <h1>✅ Order Received</h1>
+  <h1>Complete Your Payment</h1>
 </header>
 
 <main>
   <div class="product">
-    <p>Thank you for your order.</p>
+    <p><b>Order ID</b></p>
+    <h2 id="oid"></h2>
 
-    <p>
-      <b>Your Order ID:</b><br>
-      <span id="oid"></span>
+    <p><b>Amount</b>: ₹<span id="amt"></span></p>
+
+    <p class="note">
+      Please complete your payment using UPI.  
+      Ensure the <b>Order ID</b> is entered in the payment note.
+    </p>
+
+    <button id="payNow">Pay Now via UPI</button>
+
+    <hr>
+
+    <p class="note">
+      ✅ <b>Order Confirmation</b><br><br>
+      Your order will be confirmed after payment verification.<br>
+      Once verified, we will contact you on your registered<br>
+      mobile number or email.
     </p>
 
     <p class="note">
-      We are verifying your payment.<br>
-      Once confirmed, your order will be processed.
+      Please do not place duplicate orders.
     </p>
-
-    <p>Please do not refresh or place a duplicate order.</p>
   </div>
 </main>
 
 <script>
   const params = new URLSearchParams(window.location.search);
-  document.getElementById("oid").innerText = params.get("orderId");
+  const orderId = params.get("orderId");
+  const amount = params.get("amount");
+
+  document.getElementById("oid").innerText = orderId;
+  document.getElementById("amt").innerText = amount;
+
+  const upiId = "7978990755@axl";
+  const upiLink =
+    `upi://pay?pa=${upiId}&pn=EarmuffsStore&am=${amount}&cu=INR&tn=${orderId}`;
+
+  document.getElementById("payNow").onclick = () => {
+    window.location.href = upiLink;
+  };
 </script>
 
 </body>
