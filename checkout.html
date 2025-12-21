@@ -19,48 +19,41 @@
     <p><b>Order ID:</b> <span id="orderId"></span></p>
 
     <p class="note">
-      ⚠️ Please ensure the <b>Order ID</b> is visible in the UPI payment note.
+      Please proceed to payment.  
+      Ensure the <b>Order ID</b> is visible in the UPI payment note.
     </p>
 
-    <button id="payBtn">Pay Now via UPI</button>
+    <button id="payBtn">Continue to Payment</button>
     <p id="status"></p>
   </div>
 </main>
 
-<!-- ================= EMAILJS ================= -->
+<!-- EMAILJS -->
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 <script>
-  (function () {
-    emailjs.init("mlvIRvITsuSCGHJMH"); // ✅ YOUR PUBLIC KEY
-  })();
+  emailjs.init("mlvIRvITsuSCGHJMH"); // Public Key
 </script>
 
-<!-- ================= FIREBASE ================= -->
+<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-  const firebaseConfig = {
+  firebase.initializeApp({
     apiKey: "AIzaSyAcokjcwR2WEiis__c61TuXEzYXhxUlKB8",
     authDomain: "shop-template-7d574.firebaseapp.com",
     projectId: "shop-template-7d574"
-  };
+  });
 
-  firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 </script>
 
-<!-- ================= MAIN LOGIC ================= -->
 <script>
-  /* ---------- GET PRODUCT DATA ---------- */
   const params = new URLSearchParams(window.location.search);
   const product = params.get("product") || "Earmuffs";
   const price = params.get("price") || "499";
-
-  /* ---------- GENERATE ORDER ID ---------- */
   const orderId = "ORD-" + Date.now();
 
-  /* ---------- DISPLAY ---------- */
   document.getElementById("product").innerText = product;
   document.getElementById("price").innerText = price;
   document.getElementById("orderId").innerText = orderId;
@@ -68,52 +61,33 @@
   const payBtn = document.getElementById("payBtn");
   const statusEl = document.getElementById("status");
 
-  /* ---------- UPI LINK ---------- */
-  const upiId = "7978990755@axl";
-  const upiLink =
-    `upi://pay?pa=${upiId}&pn=EarmuffsStore&am=${price}&cu=INR&tn=${orderId}`;
-
-  /* ---------- BUTTON CLICK ---------- */
-  payBtn.addEventListener("click", async () => {
+  payBtn.onclick = async () => {
     payBtn.disabled = true;
-    statusEl.innerText = "Creating order…";
+    statusEl.innerText = "Creating your order…";
 
     try {
-      /* 1️⃣ SAVE ORDER (BLOCKING – MUST SUCCEED) */
       await db.collection("orders").add({
-        orderId: orderId,
-        product: product,
+        orderId,
+        product,
         amount: Number(price),
         status: "PENDING",
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
 
-      /* 2️⃣ SEND EMAIL (NON-BLOCKING) */
-      emailjs.send(
-        "service_d4k3sjg",   // ✅ SERVICE ID
-        "template_aqune66",  // ✅ TEMPLATE ID
-        {
-          order_id: orderId,
-          product: product,
-          amount: price
-        }
-      ).then(
-        () => console.log("Email sent"),
-        err => console.error("Email error", err)
-      );
+      emailjs.send("service_d4k3sjg", "template_aqune66", {
+        order_id: orderId,
+        product: product,
+        amount: price
+      });
 
-      /* 3️⃣ REDIRECT TO UPI (ALWAYS) */
-      statusEl.innerText = "Redirecting to UPI…";
-      setTimeout(() => {
-        window.location.href = upiLink;
-      }, 500);
+      window.location.href =
+        `success.html?orderId=${orderId}&amount=${price}`;
 
-    } catch (err) {
-      console.error("ORDER ERROR:", err);
-      statusEl.innerText = "❌ Failed to create order. Try again.";
+    } catch (e) {
+      statusEl.innerText = "❌ Unable to create order. Please try again.";
       payBtn.disabled = false;
     }
-  });
+  };
 </script>
 
 </body>
