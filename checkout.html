@@ -30,7 +30,7 @@
 <!-- ================= EMAILJS ================= -->
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 <script>
-  (function(){
+  (function () {
     emailjs.init("mlvIRvITsuSCGHJMH"); // ✅ YOUR PUBLIC KEY
   })();
 </script>
@@ -52,15 +52,15 @@
 
 <!-- ================= MAIN LOGIC ================= -->
 <script>
-  // Get product data
+  /* ---------- GET PRODUCT DATA ---------- */
   const params = new URLSearchParams(window.location.search);
   const product = params.get("product") || "Earmuffs";
   const price = params.get("price") || "499";
 
-  // Generate Order ID
+  /* ---------- GENERATE ORDER ID ---------- */
   const orderId = "ORD-" + Date.now();
 
-  // Show on page
+  /* ---------- DISPLAY ---------- */
   document.getElementById("product").innerText = product;
   document.getElementById("price").innerText = price;
   document.getElementById("orderId").innerText = orderId;
@@ -68,16 +68,18 @@
   const payBtn = document.getElementById("payBtn");
   const statusEl = document.getElementById("status");
 
-  const upiId = "7381749483@okbizaxis";
+  /* ---------- UPI LINK ---------- */
+  const upiId = "7978990755@axl";
   const upiLink =
     `upi://pay?pa=${upiId}&pn=EarmuffsStore&am=${price}&cu=INR&tn=${orderId}`;
 
+  /* ---------- BUTTON CLICK ---------- */
   payBtn.addEventListener("click", async () => {
     payBtn.disabled = true;
-    statusEl.innerText = "Creating order and sending notification…";
+    statusEl.innerText = "Creating order…";
 
     try {
-      /* 1️⃣ SAVE ORDER TO FIRESTORE */
+      /* 1️⃣ SAVE ORDER (BLOCKING – MUST SUCCEED) */
       await db.collection("orders").add({
         orderId: orderId,
         product: product,
@@ -86,24 +88,29 @@
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
 
-      /* 2️⃣ SEND EMAIL TO ADMIN */
-
-      await emailjs.send(
-        "service_d4k3sjg",      // ✅ SERVICE ID
-        "template_aqune66",     // ✅ TEMPLATE ID
+      /* 2️⃣ SEND EMAIL (NON-BLOCKING) */
+      emailjs.send(
+        "service_d4k3sjg",   // ✅ SERVICE ID
+        "template_aqune66",  // ✅ TEMPLATE ID
         {
           order_id: orderId,
           product: product,
           amount: price
         }
+      ).then(
+        () => console.log("Email sent"),
+        err => console.error("Email error", err)
       );
 
-      /* 3️⃣ REDIRECT TO UPI */
-      window.location.href = upiLink;
+      /* 3️⃣ REDIRECT TO UPI (ALWAYS) */
+      statusEl.innerText = "Redirecting to UPI…";
+      setTimeout(() => {
+        window.location.href = upiLink;
+      }, 500);
 
-    } catch (error) {
-      console.error("ERROR:", error);
-      statusEl.innerText = "❌ Error sending notification. Try again.";
+    } catch (err) {
+      console.error("ORDER ERROR:", err);
+      statusEl.innerText = "❌ Failed to create order. Try again.";
       payBtn.disabled = false;
     }
   });
