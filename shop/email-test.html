@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>EmailJS Test</title>
+</head>
+<body>
+
+<h2>EmailJS Test</h2>
+<button onclick="sendTest()">SEND TEST EMAIL</button>
+
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
+<script>
+  // INIT EMAILJS
+  emailjs.init("mlvIRvITsuSCGHJMH");
+
+  function sendTest() {
+    emailjs.send(
+      "service_d4k3sjg",
+      "template_aqune66",
+      {
+        order_id: "TEST-ORDER-123",
+        product: "Earmuffs",
+        amount: "499"
+      }
+    ).then(
+      function () {
+        alert("✅ Email SENT successfully");
+      },
+      function (error) {
+        alert("❌ ERROR: " + JSON.stringify(error));
+        console.error(error);
+      }
+    );
+  }
+</script>
+
+</body>
+</html>
