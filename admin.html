@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel - Earmuffs</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background: #111;
+      color: white;
+    }
+    .paid {
+      color: green;
+      font-weight: bold;
+    }
+    .pending {
+      color: orange;
+      font-weight: bold;
+    }
+    .rejected {
+      color: red;
+      font-weight: bold;
+    }
+    button {
+      margin: 2px;
+      padding: 6px 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Admin Dashboard</h1>
+</header>
+
+<main>
+  <table>
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>Product</th>
+        <th>Amount</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="ordersTable">
+      <tr>
+        <td colspan="5">Loading orders...</td>
+      </tr>
+    </tbody>
+  </table>
+</main>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+  // 🔥 FIREBASE CONFIG (SAME AS CHECKOUT)
+  const firebaseConfig = {
+    apiKey: "AIzaSyAcokjcwR2WEiis__c61TuXEzYXhxUlKB8",
+    authDomain: "shop-template-7d574.firebaseapp.com",
+    projectId: "shop-template-7d574"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  const tableBody = document.getElementById("ordersTable");
+
+  // 📥 LOAD ORDERS
+  db.collection("orders")
+    .orderBy("createdAt", "desc")
+    .onSnapshot(snapshot => {
+      tableBody.innerHTML = "";
+
+      if (snapshot.empty) {
+        tableBody.innerHTML =
+          "<tr><td colspan='5'>No orders yet</td></tr>";
+        return;
+      }
+
+      snapshot.forEach(doc => {
+        const data = doc.data();
+
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+          <td>${data.orderId}</td>
+          <td>${data.product}</td>
+          <td>₹${data.amount}</td>
+          <td class="${data.status.toLowerCase()}">${data.status}</td>
+          <td>
+            <button onclick="updateStatus('${doc.id}', 'PAID')">PAID</button>
+            <button onclick="updateStatus('${doc.id}', 'REJECTED')">REJECT</button>
+          </td>
+        `;
+
+        tableBody.appendChild(tr);
+      });
+    });
+
+  // ✏️ UPDATE STATUS
+  function updateStatus(docId, status) {
+    if (!confirm(`Mark order as ${status}?`)) return;
+
+    db.collection("orders").doc(docId).update({
+      status: status
+    });
+  }
+</script>
+
+</body>
+</html>
