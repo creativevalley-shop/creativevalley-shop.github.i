@@ -24,7 +24,7 @@
     <h3 id="productName"></h3>
     <p class="price">₹<span id="price"></span></p>
 
-    <!-- CUSTOMER INFO -->
+    <!-- CUSTOMER -->
     <input id="name" type="text" placeholder="Full Name *">
     <input id="phone" type="tel" placeholder="Mobile Number *">
     <input id="email" type="email" placeholder="Email (optional)">
@@ -37,7 +37,7 @@
 
     <p class="note">
       Your order will be confirmed after payment verification.<br>
-      Returns & cancellations follow our shipping partner’s policy.
+      Returns follow our shipping partner’s policy.
     </p>
 
     <button id="continueBtn" class="primary">
@@ -53,13 +53,13 @@
   Need help? Contact us via WhatsApp
 </footer>
 
-<!-- ================= EMAILJS ================= -->
+<!-- EMAILJS -->
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 <script>
-  emailjs.init("mlvIRvITsuSCGHJMH"); // your public key
+  emailjs.init("mlvIRvITsuSCGHJMH");
 </script>
 
-<!-- ================= FIREBASE ================= -->
+<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
@@ -72,12 +72,14 @@ firebase.initializeApp({
 const db = firebase.firestore();
 </script>
 
-<!-- ================= MAIN LOGIC ================= -->
+<!-- LOGIC -->
 <script>
 const params = new URLSearchParams(window.location.search);
 const product = params.get("product") || "Product";
 const price = params.get("price") || "0";
-const orderId = "ORD-" + Date.now();
+
+/* ✅ UPI-SAFE ORDER ID */
+const orderId = "GC" + Date.now().toString().slice(-10);
 
 document.getElementById("productName").innerText = product;
 document.getElementById("price").innerText = price;
@@ -105,7 +107,6 @@ btn.addEventListener("click", async () => {
   statusEl.innerText = "Creating your order…";
 
   try {
-    // 1️⃣ SAVE ORDER
     await db.collection("orders").add({
       orderId,
       product,
@@ -121,45 +122,34 @@ btn.addEventListener("click", async () => {
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    // 2️⃣ ADMIN EMAIL (NON-BLOCKING)
-    emailjs.send(
-      "service_d4k3sjg",
-      "template_aqune66",
-      {
+    /* ADMIN EMAIL (NON-BLOCKING) */
+    emailjs.send("service_d4k3sjg", "template_aqune66", {
+      order_id: orderId,
+      product,
+      amount: price
+    }).catch(()=>{});
+
+    /* CUSTOMER EMAIL (OPTIONAL) */
+    if (emailVal) {
+      emailjs.send("service_d4k3sjg", "template_customer_confirm", {
+        customer_email: emailVal,
         order_id: orderId,
         product,
         amount: price
-      }
-    ).catch(() => {});
-
-    // 3️⃣ CUSTOMER EMAIL (OPTIONAL)
-    if (emailVal) {
-      emailjs.send(
-        "service_d4k3sjg",
-        "template_customer_confirm",
-        {
-          customer_email: emailVal,
-          order_id: orderId,
-          product,
-          amount: price
-        }
-      ).catch(() => {});
+      }).catch(()=>{});
     }
 
-    // 4️⃣ REDIRECT (ALWAYS)
     setTimeout(() => {
       window.location.href =
         `success.html?orderId=${orderId}&amount=${price}`;
     }, 400);
 
-  } catch (err) {
-    console.error(err);
+  } catch (e) {
     statusEl.innerText = "❌ Something went wrong. Please try again.";
     btn.disabled = false;
   }
 });
 </script>
-
 
 </body>
 </html>
