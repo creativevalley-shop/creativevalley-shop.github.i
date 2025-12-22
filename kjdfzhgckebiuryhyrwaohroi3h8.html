@@ -33,7 +33,6 @@ const db = firebase.firestore();
 <script>
 const ordersDiv = document.getElementById("orders");
 
-/* REALTIME ORDERS */
 db.collection("orders")
   .orderBy("createdAt", "desc")
   .onSnapshot(snapshot => {
@@ -41,8 +40,6 @@ db.collection("orders")
 
     snapshot.forEach(doc => {
       const o = doc.data();
-
-      // Only show pending orders (reduce noise)
       if (o.status !== "PENDING") return;
 
       const div = document.createElement("div");
@@ -50,23 +47,30 @@ db.collection("orders")
 
       div.innerHTML = `
         <h3>${o.orderId}</h3>
+        <p class="amount">₹${o.amount}</p>
 
-        <p class="amount">
-          ₹${o.amount} • ${o.customerName}
-        </p>
+        <div class="copy-grid">
+          <button onclick="copyText('${o.customerName}')">👤 Name</button>
+          <button onclick="copyText('${o.phone}')">📞 Phone</button>
+          <button onclick="copyText('${o.address}')">🏠 Address</button>
+          <button onclick="copyText('${o.city}')">📍 City</button>
+          <button onclick="copyText('${o.state}')">🧭 State</button>
+          <button onclick="copyText('${o.pincode}')">🔢 Pincode</button>
+        </div>
 
-        <p class="phone">📞 ${o.phone}</p>
+        <button class="copy-full"
+          onclick="copyText(
+            'Name: ${o.customerName}\\nPhone: ${o.phone}\\nAddress: ${o.address}\\nCity: ${o.city}\\nState: ${o.state}\\nPincode: ${o.pincode}'
+          )">
+          📋 Copy Full Address
+        </button>
 
         <button class="process"
           onclick="processOrder(
             '${doc.id}',
             '${o.customerName}',
             '${o.phone}',
-            '${o.orderId}',
-            '${o.address}',
-            '${o.city}',
-            '${o.state}',
-            '${o.pincode}'
+            '${o.orderId}'
           )">
           ⚡ PROCESS ORDER
         </button>
@@ -76,27 +80,20 @@ db.collection("orders")
     });
   });
 
+/* COPY HELPER */
+function copyText(text) {
+  navigator.clipboard.writeText(text)
+    .then(() => console.log("Copied:", text))
+    .catch(() => alert("Clipboard permission required"));
+}
+
 /* ONE-CLICK PROCESS */
-function processOrder(id, name, phone, orderId, address, city, state, pincode) {
+function processOrder(id, name, phone, orderId) {
 
-  // 1️⃣ COPY ADDRESS (MEESHO READY)
-  const addressText =
-`Name: ${name}
-Phone: ${phone}
-Address: ${address}
-City: ${city}
-State: ${state}
-Pincode: ${pincode}`;
+  // Mark PAID
+  db.collection("orders").doc(id).update({ status: "PAID" });
 
-  navigator.clipboard.writeText(addressText)
-    .catch(() => alert("Clipboard permission needed"));
-
-  // 2️⃣ MARK AS PAID
-  db.collection("orders").doc(id).update({
-    status: "PAID"
-  });
-
-  // 3️⃣ OPEN WHATSAPP (PAID MESSAGE)
+  // WhatsApp message
   const message =
 `Hello ${name},
 
@@ -106,11 +103,10 @@ Order ID: ${orderId}
 Your order is being processed.
 Thank you for shopping with us 🙂`;
 
-  const waUrl =
-    "https://wa.me/91" + phone +
-    "?text=" + encodeURIComponent(message);
-
-  window.open(waUrl, "_blank");
+  window.open(
+    "https://wa.me/91" + phone + "?text=" + encodeURIComponent(message),
+    "_blank"
+  );
 }
 </script>
 
