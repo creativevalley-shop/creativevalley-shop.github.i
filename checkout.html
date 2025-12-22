@@ -15,37 +15,47 @@
 <main>
   <div class="card checkout">
 
-    <h1>Checkout</h1>
+  <h1>Almost Yours ✨</h1>
+  <p class="sub">
+    Please share a few details to complete your order
+  </p>
 
-    <p class="order">
-      <b>Order ID:</b> <span id="orderId"></span>
-    </p>
-
-    <h3 id="productName"></h3>
-    <p class="price">₹<span id="price"></span></p>
-
-    <!-- CUSTOMER -->
-    <input id="name" type="text" placeholder="Full Name *">
-    <input id="phone" type="tel" placeholder="Mobile Number *">
-    <input id="email" type="email" placeholder="Email (optional)">
-
-    <!-- ADDRESS -->
-    <input id="address" type="text" placeholder="House / Street / Area *">
-    <input id="city" type="text" placeholder="City *">
-    <input id="state" type="text" placeholder="State *">
-    <input id="pincode" type="number" placeholder="Pincode *">
-
-    <p class="note">
-      Your order will be confirmed after payment verification.
-    </p>
-
-    <button id="continueBtn" class="primary">
-      Continue to Payment
-    </button>
-
-    <p id="status" class="status"></p>
-
+  <!-- ORDER SUMMARY -->
+  <div class="summary">
+    <span id="productName"></span>
+    <strong>₹<span id="price"></span></strong>
   </div>
+
+  <!-- STEP 1 -->
+  <h3 class="section-title">Contact Details</h3>
+
+  <input id="name" type="text" placeholder="Full Name">
+  <input id="phone" type="tel" placeholder="Mobile Number">
+
+  <!-- STEP 2 -->
+  <h3 class="section-title">Delivery Address</h3>
+
+  <input id="address" type="text" placeholder="House / Street / Area">
+  <div class="row">
+    <input id="city" type="text" placeholder="City">
+    <input id="state" type="text" placeholder="State">
+  </div>
+  <input id="pincode" type="number" placeholder="Pincode">
+
+  <!-- TRUST -->
+  <p class="trust">
+    🔒 Secure UPI payment • Order confirmed on WhatsApp
+  </p>
+
+  <!-- CTA -->
+  <button id="continueBtn" class="primary big">
+    Pay ₹<span id="priceBtn"></span> Securely
+  </button>
+
+  <p id="status" class="status"></p>
+
+</div>
+
 </main>
 
 <footer>
