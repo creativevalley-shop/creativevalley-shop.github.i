@@ -1,35 +1,105 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Earmuffs Store</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Everyday Essentials Store</title>
   <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
 
-<header>
-  <h1>🎧 Noise-Cancelling Earmuffs</h1>
-</header>
+<!-- HERO -->
+<section class="hero">
+  <!-- OPTIONAL BACKGROUND VIDEO -->
+  <video
+    class="bg-video"
+    autoplay
+    muted
+    loop
+    playsinline
+    poster="assets/hero.jpg"
+  >
+    <source src="https://v1.pinimg.com/videos/iht/expMp4/b9/bd/72/b9bd72ce6c50e41f275174dd63b61015_720w.mp4" type="video/mp4">
+  </video>
 
-<main>
-  <div class="product">
-    <img src="assets/earmuffs.jpg" alt="Earmuffs" width="250">
-    <h2>Premium Noise-Cancelling Earmuffs</h2>
+  <!-- OVERLAY -->
+  <div class="overlay"></div>
+
+  <!-- HERO CONTENT -->
+  <div class="hero-content">
+    <h1>Everyday essentials for comfort & ease</h1>
+    <p>Simple products designed to make daily life easier.</p>
+
+    <a href="#products">
+      <button class="primary">Shop Collection</button>
+    </a>
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<main id="products" class="grid">
+
+  <div class="card">
+    <h3>Noise-Reducing Earmuffs</h3>
+    <p class="desc">For focus & comfort</p>
     <p class="price">₹499</p>
-
-    <ul class="features">
-      <li>✔ High noise reduction</li>
-      <li>✔ Comfortable for long use</li>
-      <li>✔ Suitable for work & study</li>
-    </ul>
-
     <a href="checkout.html?product=Earmuffs&price=499">
       <button>Buy Now</button>
     </a>
   </div>
+
+  <div class="card">
+    <h3>Sleep Eye Mask</h3>
+    <p class="desc">For better rest</p>
+    <p class="price">₹349</p>
+    <a href="checkout.html?product=Eye Mask&price=349">
+      <button>Buy Now</button>
+    </a>
+  </div>
+
+  <div class="card">
+    <h3>Mini Organizer</h3>
+    <p class="desc">For a clutter-free day</p>
+    <p class="price">₹399</p>
+    <a href="checkout.html?product=Organizer&price=399">
+      <button>Buy Now</button>
+    </a>
+  </div>
+
+  <div class="card">
+    <h3>Aroma Candle</h3>
+    <p class="desc">For calm evenings</p>
+    <p class="price">₹299</p>
+    <a href="checkout.html?product=Candle&price=299">
+      <button>Buy Now</button>
+    </a>
+  </div>
+
 </main>
 
+<!-- TRUST -->
+<section class="trust">
+  <p>
+    ✔ Trusted by 10,000+ customers<br>
+    ✔ Secure prepaid orders<br>
+    ✔ Support via Call / WhatsApp
+  </p>
+</section>
+
+<!-- REVIEWS -->
+<section class="reviews">
+  <p>⭐ “Use karna simple hai aur daily life mein kaam aata hai.”  
+  <br><b>– Aman, Bengaluru</b></p>
+
+  <p>⭐ “Website clean hai aur confirmation bhi mila.”  
+  <br><b>– Riya, Mumbai</b></p>
+
+  <p>⭐ “Instagram se aaya tha, experience smooth raha.”  
+  <br><b>– Karan, Delhi</b></p>
+</section>
+
 <footer>
-  <p>© 2025 Earmuffs Store</p>
+  © 2025 • Everyday Essentials Store
 </footer>
 
 </body>
