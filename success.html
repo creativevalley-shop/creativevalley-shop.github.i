@@ -31,23 +31,21 @@
       before completing payment.
     </p>
 
-    <!-- PAY BUTTON -->
     <button id="payNow" class="primary big">
       Pay Now via UPI
     </button>
 
     <p class="note">
-      After payment verification, your order will be confirmed.<br>
+      Your order will be confirmed after payment verification.<br>
       We will contact you on your registered mobile number or email.
     </p>
 
     <hr>
 
-    <!-- SAVE CONTACT -->
     <div class="save-contact">
       <p><b>📞 Save Our Number</b></p>
       <p class="small">
-        Save our number to receive order confirmation and updates.
+        Save our number to receive order updates and confirmation.
       </p>
 
       <a href="earmuffs-store.vcf" download>
@@ -73,7 +71,7 @@ document.getElementById("amount").innerText = amount;
 document.getElementById("payNow").onclick = () => {
   const note = encodeURIComponent(orderId);
   window.location.href =
-    `upi://pay?pa=7978990755@axl&pn=GlowCart&am=${amount}&cu=INR&tn=${note}`;
+    `upi://pay?pa=7381749483@okbizaxis&pn=Payment&am=${amount}&cu=INR&tn=${note}`;
 };
 </script>
 
