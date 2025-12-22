@@ -55,7 +55,7 @@
 <!-- ================= EMAILJS ================= -->
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 <script>
-(function(){
+(function () {
   emailjs.init("mlvIRvITsuSCGHJMH"); // PUBLIC KEY
 })();
 </script>
@@ -75,12 +75,12 @@ const db = firebase.firestore();
 
 <!-- ================= LOGIC ================= -->
 <script>
-/* GET PRODUCT DETAILS */
+/* PRODUCT DATA */
 const params = new URLSearchParams(window.location.search);
 const product = params.get("product") || "Product";
 const price = params.get("price") || "0";
 
-/* FINAL ORDER ID (UPI SAFE) */
+/* ORDER ID (UPI SAFE) */
 const orderId = "GC" + Date.now().toString().slice(-10);
 
 /* DISPLAY */
@@ -93,14 +93,16 @@ const statusEl = document.getElementById("status");
 
 btn.addEventListener("click", async () => {
 
-  const nameVal = name.value.trim();
-  const phoneVal = phone.value.trim();
-  const emailVal = email.value.trim();
-  const addressVal = address.value.trim();
-  const cityVal = city.value.trim();
-  const stateVal = state.value.trim();
-  const pincodeVal = pincode.value.trim();
+  /* FORM VALUES */
+  const nameVal = document.getElementById("name").value.trim();
+  const phoneVal = document.getElementById("phone").value.trim();
+  const emailVal = document.getElementById("email").value.trim();
+  const addressVal = document.getElementById("address").value.trim();
+  const cityVal = document.getElementById("city").value.trim();
+  const stateVal = document.getElementById("state").value.trim();
+  const pincodeVal = document.getElementById("pincode").value.trim();
 
+  /* VALIDATION */
   if (!nameVal || !phoneVal || !addressVal || !cityVal || !stateVal || !pincodeVal) {
     alert("Please fill all required fields");
     return;
@@ -110,10 +112,10 @@ btn.addEventListener("click", async () => {
   statusEl.innerText = "Creating your order…";
 
   try {
-    /* 1️⃣ SAVE ORDER (CRITICAL PATH) */
+    /* 1️⃣ SAVE ORDER + ADDRESS (MANDATORY) */
     await db.collection("orders").add({
-      orderId,
-      product,
+      orderId: orderId,
+      product: product,
       amount: Number(price),
       customerName: nameVal,
       phone: phoneVal,
@@ -126,9 +128,9 @@ btn.addEventListener("click", async () => {
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    console.log("Order saved");
+    console.log("Order and address saved");
 
-    /* 2️⃣ EMAILJS — DELAYED FIRE (MATCHES test.html BEHAVIOR) */
+    /* 2️⃣ ADMIN NOTIFICATION (AFTER SAVE ONLY) */
     setTimeout(() => {
       emailjs.send(
         "service_d4k3sjg",
@@ -139,12 +141,12 @@ btn.addEventListener("click", async () => {
           amount: price
         }
       ).then(
-        () => console.log("Admin email sent"),
+        () => console.log("Admin notification sent"),
         err => console.error("EmailJS error", err)
       );
     }, 150);
 
-    /* 3️⃣ REDIRECT (ALWAYS HAPPENS) */
+    /* 3️⃣ REDIRECT (LAST STEP) */
     window.location.replace(
       `success.html?orderId=${orderId}&amount=${price}`
     );
