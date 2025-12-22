@@ -16,7 +16,7 @@
   <div id="orders"></div>
 </main>
 
-<!-- FIREBASE -->
+<!-- ================= FIREBASE ================= -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
@@ -29,9 +29,11 @@ firebase.initializeApp({
 const db = firebase.firestore();
 </script>
 
+<!-- ================= ADMIN LOGIC ================= -->
 <script>
 const ordersDiv = document.getElementById("orders");
 
+/* REALTIME ORDERS */
 db.collection("orders")
   .orderBy("createdAt", "desc")
   .onSnapshot(snapshot => {
@@ -40,46 +42,33 @@ db.collection("orders")
     snapshot.forEach(doc => {
       const o = doc.data();
 
+      // Only show pending orders (reduce noise)
+      if (o.status !== "PENDING") return;
+
       const div = document.createElement("div");
       div.className = "card admin-card";
 
       div.innerHTML = `
         <h3>${o.orderId}</h3>
-        <p><b>₹${o.amount}</b> • ${o.status}</p>
 
-        <p>
-          <b>${o.customerName}</b><br>
-          📞 ${o.phone}<br>
-          📍 ${o.address}, ${o.city}, ${o.state} - ${o.pincode}
+        <p class="amount">
+          ₹${o.amount} • ${o.customerName}
         </p>
 
-        <button onclick="copyAddress(
-          '${o.customerName}',
-          '${o.phone}',
-          '${o.address}',
-          '${o.city}',
-          '${o.state}',
-          '${o.pincode}'
-        )">
-          📋 Copy Address
-        </button>
+        <p class="phone">📞 ${o.phone}</p>
 
-        <button onclick="markPaid(
-          '${doc.id}',
-          '${o.customerName}',
-          '${o.phone}',
-          '${o.orderId}'
-        )" class="paid">
-          ✅ Mark PAID & WhatsApp
-        </button>
-
-        <button onclick="markRejected(
-          '${doc.id}',
-          '${o.customerName}',
-          '${o.phone}',
-          '${o.orderId}'
-        )" class="reject">
-          ❌ Reject & WhatsApp
+        <button class="process"
+          onclick="processOrder(
+            '${doc.id}',
+            '${o.customerName}',
+            '${o.phone}',
+            '${o.orderId}',
+            '${o.address}',
+            '${o.city}',
+            '${o.state}',
+            '${o.pincode}'
+          )">
+          ⚡ PROCESS ORDER
         </button>
       `;
 
@@ -87,9 +76,11 @@ db.collection("orders")
     });
   });
 
-/* COPY ADDRESS */
-function copyAddress(name, phone, address, city, state, pincode) {
-  const text =
+/* ONE-CLICK PROCESS */
+function processOrder(id, name, phone, orderId, address, city, state, pincode) {
+
+  // 1️⃣ COPY ADDRESS (MEESHO READY)
+  const addressText =
 `Name: ${name}
 Phone: ${phone}
 Address: ${address}
@@ -97,61 +88,29 @@ City: ${city}
 State: ${state}
 Pincode: ${pincode}`;
 
-  navigator.clipboard.writeText(text)
-    .then(() => alert("Address copied for Meesho ✅"));
-}
+  navigator.clipboard.writeText(addressText)
+    .catch(() => alert("Clipboard permission needed"));
 
-/* MARK PAID */
-function markPaid(docId, name, phone, orderId) {
-  if (!confirm("Confirm PAID?")) return;
+  // 2️⃣ MARK AS PAID
+  db.collection("orders").doc(id).update({
+    status: "PAID"
+  });
 
-  db.collection("orders").doc(docId).update({ status: "PAID" });
-
+  // 3️⃣ OPEN WHATSAPP (PAID MESSAGE)
   const message =
 `Hello ${name},
 
-This is to confirm that we have received your payment for your order.
+Payment received for your order ✅
+Order ID: ${orderId}
 
-🧾 Order ID: ${orderId}
-
-Your order is now confirmed and is being processed.
-We will share further updates once it is shipped.
-
+Your order is being processed.
 Thank you for shopping with us 🙂`;
 
-  openWhatsApp(phone, message);
-}
-
-/* MARK REJECTED */
-function markRejected(docId, name, phone, orderId) {
-  if (!confirm("Confirm REJECTED?")) return;
-
-  db.collection("orders").doc(docId).update({ status: "REJECTED" });
-
-  const message =
-`Hello ${name},
-
-We could not verify the payment for your order at the moment.
-
-🧾 Order ID: ${orderId}
-
-If you have already completed the payment, please share:
-• Payment screenshot OR
-• UPI transaction reference number
-
-We’ll recheck and update you as soon as possible.
-Thank you for your understanding.`;
-
-  openWhatsApp(phone, message);
-}
-
-/* OPEN WHATSAPP */
-function openWhatsApp(phone, message) {
-  const url =
+  const waUrl =
     "https://wa.me/91" + phone +
     "?text=" + encodeURIComponent(message);
 
-  window.open(url, "_blank");
+  window.open(waUrl, "_blank");
 }
 </script>
 
