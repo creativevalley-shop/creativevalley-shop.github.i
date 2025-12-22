@@ -205,4 +205,19 @@ footer {
 .admin-card .reject {
   background: #dc2626;
   color: white;
+}.save-contact {
+  text-align: center;
+  margin-top: 20px;
 }
+
+.save-contact button {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.small {
+  font-size: 13px;
+  color: #555;
+  margin-top: 6px;
+}
+
