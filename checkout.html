@@ -36,8 +36,7 @@
     <input id="pincode" type="number" placeholder="Pincode *">
 
     <p class="note">
-      Your order will be confirmed after payment verification.<br>
-      Returns follow our shipping partner’s policy.
+      Your order will be confirmed after payment verification.
     </p>
 
     <button id="continueBtn" class="primary">
@@ -57,7 +56,7 @@
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 <script>
 (function(){
-  emailjs.init("mlvIRvITsuSCGHJMH");
+  emailjs.init("mlvIRvITsuSCGHJMH"); // PUBLIC KEY
 })();
 </script>
 
@@ -81,7 +80,7 @@ const params = new URLSearchParams(window.location.search);
 const product = params.get("product") || "Product";
 const price = params.get("price") || "0";
 
-/* UPI-SAFE ORDER ID */
+/* FINAL ORDER ID (UPI SAFE) */
 const orderId = "GC" + Date.now().toString().slice(-10);
 
 /* DISPLAY */
@@ -94,13 +93,13 @@ const statusEl = document.getElementById("status");
 
 btn.addEventListener("click", async () => {
 
-  const nameVal = document.getElementById("name").value.trim();
-  const phoneVal = document.getElementById("phone").value.trim();
-  const emailVal = document.getElementById("email").value.trim();
-  const addressVal = document.getElementById("address").value.trim();
-  const cityVal = document.getElementById("city").value.trim();
-  const stateVal = document.getElementById("state").value.trim();
-  const pincodeVal = document.getElementById("pincode").value.trim();
+  const nameVal = name.value.trim();
+  const phoneVal = phone.value.trim();
+  const emailVal = email.value.trim();
+  const addressVal = address.value.trim();
+  const cityVal = city.value.trim();
+  const stateVal = state.value.trim();
+  const pincodeVal = pincode.value.trim();
 
   if (!nameVal || !phoneVal || !addressVal || !cityVal || !stateVal || !pincodeVal) {
     alert("Please fill all required fields");
@@ -111,7 +110,7 @@ btn.addEventListener("click", async () => {
   statusEl.innerText = "Creating your order…";
 
   try {
-    /* SAVE ORDER (CRITICAL) */
+    /* 1️⃣ SAVE ORDER (CRITICAL PATH) */
     await db.collection("orders").add({
       orderId,
       product,
@@ -129,21 +128,23 @@ btn.addEventListener("click", async () => {
 
     console.log("Order saved");
 
-    /* ADMIN EMAIL (NON-BLOCKING) */
-    emailjs.send(
-      "service_d4k3sjg",
-      "template_aqune66",
-      {
-        order_id: orderId,
-        product: product,
-        amount: price
-      }
-    ).then(
-      () => console.log("Admin email sent"),
-      err => console.error("EmailJS error", err)
-    );
+    /* 2️⃣ EMAILJS — DELAYED FIRE (MATCHES test.html BEHAVIOR) */
+    setTimeout(() => {
+      emailjs.send(
+        "service_d4k3sjg",
+        "template_aqune66",
+        {
+          order_id: orderId,
+          product: product,
+          amount: price
+        }
+      ).then(
+        () => console.log("Admin email sent"),
+        err => console.error("EmailJS error", err)
+      );
+    }, 150);
 
-    /* REDIRECT — ALWAYS */
+    /* 3️⃣ REDIRECT (ALWAYS HAPPENS) */
     window.location.replace(
       `success.html?orderId=${orderId}&amount=${price}`
     );
