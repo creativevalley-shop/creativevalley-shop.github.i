@@ -72,13 +72,12 @@ firebase.initializeApp({
 const db = firebase.firestore();
 </script>
 
-<!-- LOGIC -->
 <script>
 const params = new URLSearchParams(window.location.search);
 const product = params.get("product") || "Product";
 const price = params.get("price") || "0";
 
-/* ✅ UPI-SAFE ORDER ID */
+/* ✅ FINAL ORDER ID (UPI-SAFE) */
 const orderId = "GC" + Date.now().toString().slice(-10);
 
 document.getElementById("productName").innerText = product;
@@ -122,14 +121,12 @@ btn.addEventListener("click", async () => {
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    /* ADMIN EMAIL (NON-BLOCKING) */
     emailjs.send("service_d4k3sjg", "template_aqune66", {
       order_id: orderId,
       product,
       amount: price
     }).catch(()=>{});
 
-    /* CUSTOMER EMAIL (OPTIONAL) */
     if (emailVal) {
       emailjs.send("service_d4k3sjg", "template_customer_confirm", {
         customer_email: emailVal,
@@ -139,10 +136,9 @@ btn.addEventListener("click", async () => {
       }).catch(()=>{});
     }
 
-    setTimeout(() => {
-      window.location.href =
-        `success.html?orderId=${orderId}&amount=${price}`;
-    }, 400);
+    window.location.replace(
+      `success.html?orderId=${orderId}&amount=${price}`
+    );
 
   } catch (e) {
     statusEl.innerText = "❌ Something went wrong. Please try again.";
