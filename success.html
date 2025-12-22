@@ -9,37 +9,58 @@
 <body>
 
 <header class="top">
-  <p>Complete Payment</p>
+  <p>Complete Your Payment</p>
 </header>
 
 <main>
-  <div class="card">
+  <div class="card success">
 
-    <h2>Order ID</h2>
-    <h3 id="orderId"></h3>
+    <h1>Almost Done 🎉</h1>
 
-    <p class="price">₹<span id="amount"></span></p>
+    <p class="order-box">
+      <span>Order ID</span>
+      <strong id="orderId">----</strong>
+    </p>
+
+    <p class="amount">
+      Amount to Pay: <b>₹<span id="amount">0</span></b>
+    </p>
 
     <p class="note">
-      Please ensure the Order ID is visible in the payment note
+      Please ensure the <b>Order ID</b> is visible in the UPI note
       before completing payment.
     </p>
 
-    <button id="payNow" class="primary">
+    <!-- PAY BUTTON -->
+    <button id="payNow" class="primary big">
       Pay Now via UPI
     </button>
 
     <p class="note">
-      Your order will be confirmed after payment verification.<br>
+      After payment verification, your order will be confirmed.<br>
       We will contact you on your registered mobile number or email.
     </p>
 
-    <a href="earmuffs-store.vcf" download>
-      <button>📞 Save Our Number</button>
-    </a>
+    <hr>
+
+    <!-- SAVE CONTACT -->
+    <div class="save-contact">
+      <p><b>📞 Save Our Number</b></p>
+      <p class="small">
+        Save our number to receive order confirmation and updates.
+      </p>
+
+      <a href="earmuffs-store.vcf" download>
+        <button class="secondary">Save Contact</button>
+      </a>
+    </div>
 
   </div>
 </main>
+
+<footer>
+  Thank you for shopping with us
+</footer>
 
 <script>
 const params = new URLSearchParams(window.location.search);
@@ -51,7 +72,6 @@ document.getElementById("amount").innerText = amount;
 
 document.getElementById("payNow").onclick = () => {
   const note = encodeURIComponent(orderId);
-
   window.location.href =
     `upi://pay?pa=7978990755@axl&pn=GlowCart&am=${amount}&cu=INR&tn=${note}`;
 };
