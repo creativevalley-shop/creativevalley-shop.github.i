@@ -1,39 +1,57 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>EmailJS Test</title>
 </head>
-<body>
+<body style="font-family: Arial; padding: 20px;">
 
-<h2>EmailJS Test</h2>
-<button onclick="sendTest()">SEND TEST EMAIL</button>
+  <h2>EmailJS Test Page</h2>
+  <p>Click the button below to send a test admin email.</p>
 
-<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <button id="testBtn" style="padding:10px 20px;font-size:16px;">
+    Send Test Email
+  </button>
 
-<script>
-  // INIT EMAILJS
-  emailjs.init("mlvIRvITsuSCGHJMH");
+  <p id="status"></p>
 
-  function sendTest() {
-    emailjs.send(
-      "service_d4k3sjg",
-      "template_aqune66",
-      {
-        order_id: "TEST-ORDER-123",
-        product: "Earmuffs",
-        amount: "499"
-      }
-    ).then(
-      function () {
-        alert("✅ Email SENT successfully");
-      },
-      function (error) {
-        alert("❌ ERROR: " + JSON.stringify(error));
-        console.error(error);
-      }
-    );
-  }
-</script>
+  <!-- EMAILJS -->
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <script>
+    (function(){
+      emailjs.init("mlvIRvITsuSCGHJMH"); // your public key
+    })();
+  </script>
+
+  <script>
+    const statusEl = document.getElementById("status");
+
+    document.getElementById("testBtn").onclick = () => {
+      statusEl.innerText = "Sending email...";
+
+      emailjs.send(
+        "service_d4k3sjg",
+        "template_aqune66",
+        {
+          order_id: "TEST12345",
+          product: "Test Product",
+          amount: "100"
+        }
+      ).then(
+        () => {
+          console.log("✅ Email sent successfully");
+          statusEl.innerText = "✅ Email sent successfully";
+          alert("Email sent successfully!");
+        },
+        (error) => {
+          console.error("❌ EmailJS error", error);
+          statusEl.innerText = "❌ Error: " + error.status;
+          alert("Error sending email. Check console.");
+        }
+      );
+    };
+  </script>
 
 </body>
 </html>
