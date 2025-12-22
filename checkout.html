@@ -2,92 +2,167 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Checkout – Earmuffs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Checkout | GlowCart</title>
   <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
 
-<header>
-  <h1>Checkout</h1>
+<header class="top">
+  <p>Secure Checkout • Prepaid Only</p>
 </header>
 
 <main>
-  <div class="product">
-    <h2 id="product"></h2>
-    <p class="price">₹<span id="price"></span></p>
+  <div class="card checkout">
 
-    <p><b>Order ID:</b> <span id="orderId"></span></p>
+    <h1>Checkout</h1>
 
-    <p class="note">
-      Please proceed to payment.  
-      Ensure the <b>Order ID</b> is visible in the UPI payment note.
+    <p class="order">
+      <b>Order ID:</b> <span id="orderId"></span>
     </p>
 
-    <button id="payBtn">Continue to Payment</button>
-    <p id="status"></p>
+    <h3 id="product"></h3>
+    <p class="price">₹<span id="price"></span></p>
+
+    <!-- CUSTOMER DETAILS -->
+    <input type="text" id="name" placeholder="Full Name *">
+    <input type="tel" id="phone" placeholder="Mobile Number *">
+    <input type="email" id="email" placeholder="Email (optional)">
+
+    <!-- ADDRESS -->
+    <input type="text" id="address" placeholder="House / Street / Area *">
+    <input type="text" id="city" placeholder="City *">
+    <input type="text" id="state" placeholder="State *">
+    <input type="number" id="pincode" placeholder="Pincode *">
+
+    <p class="note">
+      Your order will be confirmed after payment verification.<br>
+      Returns handled as per shipping partner policy.
+    </p>
+
+    <button id="payBtn" class="primary">Continue to Payment</button>
+
+    <p id="status" class="status"></p>
+
   </div>
 </main>
 
-<!-- EMAILJS -->
+<footer>
+  Need help? Contact us on WhatsApp
+</footer>
+
+<!-- ================= EMAILJS ================= -->
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 <script>
-  emailjs.init("mlvIRvITsuSCGHJMH"); // Public Key
+  emailjs.init("mlvIRvITsuSCGHJMH"); // ✅ YOUR PUBLIC KEY
 </script>
 
-<!-- FIREBASE -->
+<!-- ================= FIREBASE ================= -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-  firebase.initializeApp({
-    apiKey: "AIzaSyAcokjcwR2WEiis__c61TuXEzYXhxUlKB8",
-    authDomain: "shop-template-7d574.firebaseapp.com",
-    projectId: "shop-template-7d574"
-  });
-
-  const db = firebase.firestore();
+firebase.initializeApp({
+  apiKey: "AIzaSyAcokjcwR2WEiis__c61TuXEzYXhxUlKB8",
+  authDomain: "shop-template-7d574.firebaseapp.com",
+  projectId: "shop-template-7d574"
+});
+const db = firebase.firestore();
 </script>
 
+<!-- ================= MAIN LOGIC ================= -->
 <script>
-  const params = new URLSearchParams(window.location.search);
-  const product = params.get("product") || "Earmuffs";
-  const price = params.get("price") || "499";
-  const orderId = "ORD-" + Date.now();
+const params = new URLSearchParams(location.search);
+const product = params.get("product") || "Product";
+const price = params.get("price") || "0";
+const orderId = "ORD-" + Date.now();
 
-  document.getElementById("product").innerText = product;
-  document.getElementById("price").innerText = price;
-  document.getElementById("orderId").innerText = orderId;
+document.getElementById("product").innerText = product;
+document.getElementById("price").innerText = price;
+document.getElementById("orderId").innerText = orderId;
 
-  const payBtn = document.getElementById("payBtn");
-  const statusEl = document.getElementById("status");
+const statusEl = document.getElementById("status");
+const payBtn = document.getElementById("payBtn");
 
-  payBtn.onclick = async () => {
-    payBtn.disabled = true;
-    statusEl.innerText = "Creating your order…";
+payBtn.onclick = async () => {
 
-    try {
-      await db.collection("orders").add({
-        orderId,
-        product,
-        amount: Number(price),
-        status: "PENDING",
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
+  const name = nameInput.value.trim();
+  const phone = phoneInput.value.trim();
+  const email = emailInput.value.trim();
+  const address = addressInput.value.trim();
+  const city = cityInput.value.trim();
+  const state = stateInput.value.trim();
+  const pincode = pincodeInput.value.trim();
 
-      emailjs.send("service_d4k3sjg", "template_aqune66", {
+  if (!name || !phone || !address || !city || !state || !pincode) {
+    alert("Please fill all required fields");
+    return;
+  }
+
+  payBtn.disabled = true;
+  statusEl.innerText = "Creating your order…";
+
+  try {
+    // 1️⃣ SAVE ORDER (BLOCKING)
+    await db.collection("orders").add({
+      orderId,
+      product,
+      amount: Number(price),
+      customerName: name,
+      phone,
+      email: email || null,
+      address,
+      city,
+      state,
+      pincode,
+      status: "PENDING",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    console.log("Order saved");
+
+    // 2️⃣ ADMIN EMAIL (NON-BLOCKING)
+    emailjs.send(
+      "service_d4k3sjg",
+      "template_aqune66",
+      {
         order_id: orderId,
         product: product,
         amount: price
-      });
+      }
+    ).then(
+      () => console.log("Admin email sent"),
+      err => console.error("Admin email error", err)
+    );
 
-      window.location.href =
-        `success.html?orderId=${orderId}&amount=${price}`;
-
-    } catch (e) {
-      statusEl.innerText = "❌ Unable to create order. Please try again.";
-      payBtn.disabled = false;
+    // 3️⃣ CUSTOMER EMAIL (OPTIONAL)
+    if (email) {
+      emailjs.send(
+        "service_d4k3sjg",
+        "template_customer_confirm",
+        {
+          customer_email: email,
+          order_id: orderId,
+          product: product,
+          amount: price
+        }
+      ).then(
+        () => console.log("Customer email sent"),
+        err => console.error("Customer email error", err)
+      );
     }
-  };
+
+    // 4️⃣ REDIRECT (ALWAYS)
+    setTimeout(() => {
+      location.href = `success.html?orderId=${orderId}&amount=${price}`;
+    }, 500);
+
+  } catch (err) {
+    console.error(err);
+    statusEl.innerText = "❌ Something went wrong. Please try again.";
+    payBtn.disabled = false;
+  }
+};
 </script>
 
 </body>
