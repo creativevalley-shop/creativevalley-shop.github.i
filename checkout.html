@@ -83,21 +83,20 @@ document.getElementById("productName").innerText = product;
 document.getElementById("price").innerText = price;
 document.getElementById("orderId").innerText = orderId;
 
-const statusEl = document.getElementById("status");
 const btn = document.getElementById("continueBtn");
+const statusEl = document.getElementById("status");
 
-btn.onclick = async () => {
-  const data = {
-    customerName: name.value.trim(),
-    phone: phone.value.trim(),
-    email: email.value.trim() || null,
-    address: address.value.trim(),
-    city: city.value.trim(),
-    state: state.value.trim(),
-    pincode: pincode.value.trim()
-  };
+btn.addEventListener("click", async () => {
 
-  if (!data.customerName || !data.phone || !data.address || !data.city || !data.state || !data.pincode) {
+  const nameVal = document.getElementById("name").value.trim();
+  const phoneVal = document.getElementById("phone").value.trim();
+  const emailVal = document.getElementById("email").value.trim();
+  const addressVal = document.getElementById("address").value.trim();
+  const cityVal = document.getElementById("city").value.trim();
+  const stateVal = document.getElementById("state").value.trim();
+  const pincodeVal = document.getElementById("pincode").value.trim();
+
+  if (!nameVal || !phoneVal || !addressVal || !cityVal || !stateVal || !pincodeVal) {
     alert("Please fill all required fields");
     return;
   }
@@ -106,17 +105,23 @@ btn.onclick = async () => {
   statusEl.innerText = "Creating your order…";
 
   try {
-    // 1️⃣ Save order (critical)
+    // 1️⃣ SAVE ORDER
     await db.collection("orders").add({
       orderId,
       product,
       amount: Number(price),
-      ...data,
+      customerName: nameVal,
+      phone: phoneVal,
+      email: emailVal || null,
+      address: addressVal,
+      city: cityVal,
+      state: stateVal,
+      pincode: pincodeVal,
       status: "PENDING",
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    // 2️⃣ Admin email (non-blocking)
+    // 2️⃣ ADMIN EMAIL (NON-BLOCKING)
     emailjs.send(
       "service_d4k3sjg",
       "template_aqune66",
@@ -125,23 +130,23 @@ btn.onclick = async () => {
         product,
         amount: price
       }
-    ).catch(()=>{});
+    ).catch(() => {});
 
-    // 3️⃣ Customer email (optional, non-blocking)
-    if (data.email) {
+    // 3️⃣ CUSTOMER EMAIL (OPTIONAL)
+    if (emailVal) {
       emailjs.send(
         "service_d4k3sjg",
         "template_customer_confirm",
         {
-          customer_email: data.email,
+          customer_email: emailVal,
           order_id: orderId,
           product,
           amount: price
         }
-      ).catch(()=>{});
+      ).catch(() => {});
     }
 
-    // 4️⃣ Redirect (always happens)
+    // 4️⃣ REDIRECT (ALWAYS)
     setTimeout(() => {
       window.location.href =
         `success.html?orderId=${orderId}&amount=${price}`;
@@ -152,8 +157,9 @@ btn.onclick = async () => {
     statusEl.innerText = "❌ Something went wrong. Please try again.";
     btn.disabled = false;
   }
-};
+});
 </script>
+
 
 </body>
 </html>
