@@ -192,3 +192,17 @@ footer {
   color: #555;
 }
 
+.admin-card button {
+  width: 100%;
+  margin-top: 6px;
+}
+
+.admin-card .paid {
+  background: #16a34a;
+  color: white;
+}
+
+.admin-card .reject {
+  background: #dc2626;
+  color: white;
+}
