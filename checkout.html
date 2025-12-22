@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Checkout | GlowCart</title>
+  <title>Checkout</title>
   <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
 
 <header class="top">
-  <p>Secure Checkout • Prepaid Only</p>
+  <p>Secure Checkout • Prepaid Orders Only</p>
 </header>
 
 <main>
@@ -21,26 +21,28 @@
       <b>Order ID:</b> <span id="orderId"></span>
     </p>
 
-    <h3 id="product"></h3>
+    <h3 id="productName"></h3>
     <p class="price">₹<span id="price"></span></p>
 
-    <!-- CUSTOMER DETAILS -->
-    <input type="text" id="name" placeholder="Full Name *">
-    <input type="tel" id="phone" placeholder="Mobile Number *">
-    <input type="email" id="email" placeholder="Email (optional)">
+    <!-- CUSTOMER INFO -->
+    <input id="name" type="text" placeholder="Full Name *">
+    <input id="phone" type="tel" placeholder="Mobile Number *">
+    <input id="email" type="email" placeholder="Email (optional)">
 
     <!-- ADDRESS -->
-    <input type="text" id="address" placeholder="House / Street / Area *">
-    <input type="text" id="city" placeholder="City *">
-    <input type="text" id="state" placeholder="State *">
-    <input type="number" id="pincode" placeholder="Pincode *">
+    <input id="address" type="text" placeholder="House / Street / Area *">
+    <input id="city" type="text" placeholder="City *">
+    <input id="state" type="text" placeholder="State *">
+    <input id="pincode" type="number" placeholder="Pincode *">
 
     <p class="note">
       Your order will be confirmed after payment verification.<br>
-      Returns handled as per shipping partner policy.
+      Returns & cancellations follow our shipping partner’s policy.
     </p>
 
-    <button id="payBtn" class="primary">Continue to Payment</button>
+    <button id="continueBtn" class="primary">
+      Continue to Payment
+    </button>
 
     <p id="status" class="status"></p>
 
@@ -48,13 +50,13 @@
 </main>
 
 <footer>
-  Need help? Contact us on WhatsApp
+  Need help? Contact us via WhatsApp
 </footer>
 
 <!-- ================= EMAILJS ================= -->
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 <script>
-  emailjs.init("mlvIRvITsuSCGHJMH"); // ✅ YOUR PUBLIC KEY
+  emailjs.init("mlvIRvITsuSCGHJMH"); // your public key
 </script>
 
 <!-- ================= FIREBASE ================= -->
@@ -72,95 +74,83 @@ const db = firebase.firestore();
 
 <!-- ================= MAIN LOGIC ================= -->
 <script>
-const params = new URLSearchParams(location.search);
+const params = new URLSearchParams(window.location.search);
 const product = params.get("product") || "Product";
 const price = params.get("price") || "0";
 const orderId = "ORD-" + Date.now();
 
-document.getElementById("product").innerText = product;
+document.getElementById("productName").innerText = product;
 document.getElementById("price").innerText = price;
 document.getElementById("orderId").innerText = orderId;
 
 const statusEl = document.getElementById("status");
-const payBtn = document.getElementById("payBtn");
+const btn = document.getElementById("continueBtn");
 
-payBtn.onclick = async () => {
+btn.onclick = async () => {
+  const data = {
+    customerName: name.value.trim(),
+    phone: phone.value.trim(),
+    email: email.value.trim() || null,
+    address: address.value.trim(),
+    city: city.value.trim(),
+    state: state.value.trim(),
+    pincode: pincode.value.trim()
+  };
 
-  const name = nameInput.value.trim();
-  const phone = phoneInput.value.trim();
-  const email = emailInput.value.trim();
-  const address = addressInput.value.trim();
-  const city = cityInput.value.trim();
-  const state = stateInput.value.trim();
-  const pincode = pincodeInput.value.trim();
-
-  if (!name || !phone || !address || !city || !state || !pincode) {
+  if (!data.customerName || !data.phone || !data.address || !data.city || !data.state || !data.pincode) {
     alert("Please fill all required fields");
     return;
   }
 
-  payBtn.disabled = true;
+  btn.disabled = true;
   statusEl.innerText = "Creating your order…";
 
   try {
-    // 1️⃣ SAVE ORDER (BLOCKING)
+    // 1️⃣ Save order (critical)
     await db.collection("orders").add({
       orderId,
       product,
       amount: Number(price),
-      customerName: name,
-      phone,
-      email: email || null,
-      address,
-      city,
-      state,
-      pincode,
+      ...data,
       status: "PENDING",
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    console.log("Order saved");
-
-    // 2️⃣ ADMIN EMAIL (NON-BLOCKING)
+    // 2️⃣ Admin email (non-blocking)
     emailjs.send(
       "service_d4k3sjg",
       "template_aqune66",
       {
         order_id: orderId,
-        product: product,
+        product,
         amount: price
       }
-    ).then(
-      () => console.log("Admin email sent"),
-      err => console.error("Admin email error", err)
-    );
+    ).catch(()=>{});
 
-    // 3️⃣ CUSTOMER EMAIL (OPTIONAL)
-    if (email) {
+    // 3️⃣ Customer email (optional, non-blocking)
+    if (data.email) {
       emailjs.send(
         "service_d4k3sjg",
         "template_customer_confirm",
         {
-          customer_email: email,
+          customer_email: data.email,
           order_id: orderId,
-          product: product,
+          product,
           amount: price
         }
-      ).then(
-        () => console.log("Customer email sent"),
-        err => console.error("Customer email error", err)
-      );
+      ).catch(()=>{});
     }
 
-    // 4️⃣ REDIRECT (ALWAYS)
+    // 4️⃣ Redirect (always happens)
     setTimeout(() => {
-      location.href = `success.html?orderId=${orderId}&amount=${price}`;
-    }, 500);
+      window.location.href =
+        `success.html?orderId=${orderId}&amount=${price}`;
+    }, 400);
 
   } catch (err) {
     console.error(err);
     statusEl.innerText = "❌ Something went wrong. Please try again.";
-    payBtn.disabled = false;
+    btn.disabled = false;
   }
 };
 </script>
