@@ -53,13 +53,15 @@
   Need help? Contact us via WhatsApp
 </footer>
 
-<!-- EMAILJS -->
+<!-- ================= EMAILJS ================= -->
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 <script>
+(function(){
   emailjs.init("mlvIRvITsuSCGHJMH");
+})();
 </script>
 
-<!-- FIREBASE -->
+<!-- ================= FIREBASE ================= -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
@@ -72,14 +74,17 @@ firebase.initializeApp({
 const db = firebase.firestore();
 </script>
 
+<!-- ================= LOGIC ================= -->
 <script>
+/* GET PRODUCT DETAILS */
 const params = new URLSearchParams(window.location.search);
 const product = params.get("product") || "Product";
 const price = params.get("price") || "0";
 
-/* ✅ FINAL ORDER ID (UPI-SAFE) */
+/* UPI-SAFE ORDER ID */
 const orderId = "GC" + Date.now().toString().slice(-10);
 
+/* DISPLAY */
 document.getElementById("productName").innerText = product;
 document.getElementById("price").innerText = price;
 document.getElementById("orderId").innerText = orderId;
@@ -106,6 +111,7 @@ btn.addEventListener("click", async () => {
   statusEl.innerText = "Creating your order…";
 
   try {
+    /* SAVE ORDER (CRITICAL) */
     await db.collection("orders").add({
       orderId,
       product,
@@ -121,26 +127,29 @@ btn.addEventListener("click", async () => {
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    emailjs.send("service_d4k3sjg", "template_aqune66", {
-      order_id: orderId,
-      product,
-      amount: price
-    }).catch(()=>{});
+    console.log("Order saved");
 
-    if (emailVal) {
-      emailjs.send("service_d4k3sjg", "template_customer_confirm", {
-        customer_email: emailVal,
+    /* ADMIN EMAIL (NON-BLOCKING) */
+    emailjs.send(
+      "service_d4k3sjg",
+      "template_aqune66",
+      {
         order_id: orderId,
-        product,
+        product: product,
         amount: price
-      }).catch(()=>{});
-    }
+      }
+    ).then(
+      () => console.log("Admin email sent"),
+      err => console.error("EmailJS error", err)
+    );
 
+    /* REDIRECT — ALWAYS */
     window.location.replace(
       `success.html?orderId=${orderId}&amount=${price}`
     );
 
-  } catch (e) {
+  } catch (err) {
+    console.error(err);
     statusEl.innerText = "❌ Something went wrong. Please try again.";
     btn.disabled = false;
   }
