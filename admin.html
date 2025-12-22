@@ -2,124 +2,157 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Admin Panel - Earmuffs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Panel</title>
   <link rel="stylesheet" href="assets/style.css">
-  <style>
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 10px;
-      text-align: center;
-    }
-    th {
-      background: #111;
-      color: white;
-    }
-    .paid {
-      color: green;
-      font-weight: bold;
-    }
-    .pending {
-      color: orange;
-      font-weight: bold;
-    }
-    .rejected {
-      color: red;
-      font-weight: bold;
-    }
-    button {
-      margin: 2px;
-      padding: 6px 10px;
-      cursor: pointer;
-    }
-  </style>
 </head>
 <body>
 
-<header>
-  <h1>Admin Dashboard</h1>
+<header class="top">
+  <p>Admin Panel • Orders</p>
 </header>
 
 <main>
-  <table>
-    <thead>
-      <tr>
-        <th>Order ID</th>
-        <th>Product</th>
-        <th>Amount</th>
-        <th>Status</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody id="ordersTable">
-      <tr>
-        <td colspan="5">Loading orders...</td>
-      </tr>
-    </tbody>
-  </table>
+  <div id="orders"></div>
 </main>
 
-<!-- Firebase -->
+<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-  // 🔥 FIREBASE CONFIG (SAME AS CHECKOUT)
-  const firebaseConfig = {
-    apiKey: "AIzaSyAcokjcwR2WEiis__c61TuXEzYXhxUlKB8",
-    authDomain: "shop-template-7d574.firebaseapp.com",
-    projectId: "shop-template-7d574"
-  };
+firebase.initializeApp({
+  apiKey: "AIzaSyAcokjcwR2WEiis__c61TuXEzYXhxUlKB8",
+  authDomain: "shop-template-7d574.firebaseapp.com",
+  projectId: "shop-template-7d574"
+});
+const db = firebase.firestore();
+</script>
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
+<script>
+const ordersDiv = document.getElementById("orders");
 
-  const tableBody = document.getElementById("ordersTable");
+db.collection("orders")
+  .orderBy("createdAt", "desc")
+  .onSnapshot(snapshot => {
+    ordersDiv.innerHTML = "";
 
-  // 📥 LOAD ORDERS
-  db.collection("orders")
-    .orderBy("createdAt", "desc")
-    .onSnapshot(snapshot => {
-      tableBody.innerHTML = "";
+    snapshot.forEach(doc => {
+      const o = doc.data();
 
-      if (snapshot.empty) {
-        tableBody.innerHTML =
-          "<tr><td colspan='5'>No orders yet</td></tr>";
-        return;
-      }
+      const div = document.createElement("div");
+      div.className = "card admin-card";
 
-      snapshot.forEach(doc => {
-        const data = doc.data();
+      div.innerHTML = `
+        <h3>${o.orderId}</h3>
+        <p><b>₹${o.amount}</b> • ${o.status}</p>
 
-        const tr = document.createElement("tr");
+        <p>
+          <b>${o.customerName}</b><br>
+          📞 ${o.phone}<br>
+          📍 ${o.address}, ${o.city}, ${o.state} - ${o.pincode}
+        </p>
 
-        tr.innerHTML = `
-          <td>${data.orderId}</td>
-          <td>${data.product}</td>
-          <td>₹${data.amount}</td>
-          <td class="${data.status.toLowerCase()}">${data.status}</td>
-          <td>
-            <button onclick="updateStatus('${doc.id}', 'PAID')">PAID</button>
-            <button onclick="updateStatus('${doc.id}', 'REJECTED')">REJECT</button>
-          </td>
-        `;
+        <button onclick="copyAddress(
+          '${o.customerName}',
+          '${o.phone}',
+          '${o.address}',
+          '${o.city}',
+          '${o.state}',
+          '${o.pincode}'
+        )">
+          📋 Copy Address
+        </button>
 
-        tableBody.appendChild(tr);
-      });
+        <button onclick="markPaid(
+          '${doc.id}',
+          '${o.customerName}',
+          '${o.phone}',
+          '${o.orderId}'
+        )" class="paid">
+          ✅ Mark PAID & WhatsApp
+        </button>
+
+        <button onclick="markRejected(
+          '${doc.id}',
+          '${o.customerName}',
+          '${o.phone}',
+          '${o.orderId}'
+        )" class="reject">
+          ❌ Reject & WhatsApp
+        </button>
+      `;
+
+      ordersDiv.appendChild(div);
     });
+  });
 
-  // ✏️ UPDATE STATUS
-  function updateStatus(docId, status) {
-    if (!confirm(`Mark order as ${status}?`)) return;
+/* COPY ADDRESS */
+function copyAddress(name, phone, address, city, state, pincode) {
+  const text =
+`Name: ${name}
+Phone: ${phone}
+Address: ${address}
+City: ${city}
+State: ${state}
+Pincode: ${pincode}`;
 
-    db.collection("orders").doc(docId).update({
-      status: status
-    });
-  }
+  navigator.clipboard.writeText(text)
+    .then(() => alert("Address copied for Meesho ✅"));
+}
+
+/* MARK PAID */
+function markPaid(docId, name, phone, orderId) {
+  if (!confirm("Confirm PAID?")) return;
+
+  db.collection("orders").doc(docId).update({ status: "PAID" });
+
+  const message =
+`Hello ${name},
+
+This is to confirm that we have received your payment for your order.
+
+🧾 Order ID: ${orderId}
+
+Your order is now confirmed and is being processed.
+We will share further updates once it is shipped.
+
+Thank you for shopping with us 🙂`;
+
+  openWhatsApp(phone, message);
+}
+
+/* MARK REJECTED */
+function markRejected(docId, name, phone, orderId) {
+  if (!confirm("Confirm REJECTED?")) return;
+
+  db.collection("orders").doc(docId).update({ status: "REJECTED" });
+
+  const message =
+`Hello ${name},
+
+We could not verify the payment for your order at the moment.
+
+🧾 Order ID: ${orderId}
+
+If you have already completed the payment, please share:
+• Payment screenshot OR
+• UPI transaction reference number
+
+We’ll recheck and update you as soon as possible.
+Thank you for your understanding.`;
+
+  openWhatsApp(phone, message);
+}
+
+/* OPEN WHATSAPP */
+function openWhatsApp(phone, message) {
+  const url =
+    "https://wa.me/91" + phone +
+    "?text=" + encodeURIComponent(message);
+
+  window.open(url, "_blank");
+}
 </script>
 
 </body>
