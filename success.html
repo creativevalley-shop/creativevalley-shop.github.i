@@ -2,78 +2,59 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Complete Payment</title>
   <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
 
-<header>
-  <h1>Complete Your Payment</h1>
+<header class="top">
+  <p>Complete Payment</p>
 </header>
 
 <main>
-  <div class="product">
+  <div class="card">
 
-    <h3>Order ID</h3>
-    <h2 id="orderId"></h2>
+    <h2>Order ID</h2>
+    <h3 id="orderId"></h3>
 
-    <p><b>Amount:</b> ₹<span id="amount"></span></p>
+    <p class="price">₹<span id="amount"></span></p>
 
     <p class="note">
-      Please complete the payment using UPI.<br>
-      Make sure the <b>Order ID</b> is entered in the payment note.
+      Please ensure the Order ID is visible in the payment note
+      before completing payment.
     </p>
 
-    <!-- PAY BUTTON -->
-    <button id="payNow">Pay Now via UPI</button>
+    <button id="payNow" class="primary">
+      Pay Now via UPI
+    </button>
 
-    <hr>
-
-    <!-- OFFICIAL CONFIRMATION MESSAGE -->
     <p class="note">
-      <b>Order Confirmation Notice</b><br><br>
-      Your order has been received and is currently under verification.<br><br>
-      After payment verification, the order will be placed with our
-      shipping partner.<br><br>
-      Once confirmed, we will contact you on your registered
-      mobile number or email.
+      Your order will be confirmed after payment verification.<br>
+      We will contact you on your registered mobile number or email.
     </p>
 
-    <hr>
-
-    <!-- SAVE CONTACT -->
-    <div class="note">
-      <b>📞 Save Our Number</b><br><br>
-      Please save <b>+91-7978990755</b> in your contacts to receive
-      order confirmation and updates.
-
-      <br><br>
-
-      <a href="earmuffs-store.vcf" download>
-        <button>Save Contact</button>
-      </a>
-
-      <p style="font-size:13px;">
-        This will open your contacts app.<br>
-        Just tap <b>Save</b>.
-      </p>
-    </div>
+    <a href="earmuffs-store.vcf" download>
+      <button>📞 Save Our Number</button>
+    </a>
 
   </div>
 </main>
 
 <script>
-  const params = new URLSearchParams(window.location.search);
-  const orderId = params.get("orderId");
-  const amount = params.get("amount");
+const params = new URLSearchParams(window.location.search);
+const orderId = params.get("orderId");
+const amount = params.get("amount");
 
-  document.getElementById("orderId").innerText = orderId;
-  document.getElementById("amount").innerText = amount;
+document.getElementById("orderId").innerText = orderId;
+document.getElementById("amount").innerText = amount;
 
-  document.getElementById("payNow").onclick = () => {
-    window.location.href =
-      `upi://pay?pa=7978990755@axl&pn=EarmuffsStore&am=${amount}&cu=INR&tn=${orderId}`;
-  };
+document.getElementById("payNow").onclick = () => {
+  const note = encodeURIComponent(orderId);
+
+  window.location.href =
+    `upi://pay?pa=7978990755@axl&pn=GlowCart&am=${amount}&cu=INR&tn=${note}`;
+};
 </script>
 
 </body>
