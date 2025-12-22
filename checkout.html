@@ -75,6 +75,7 @@ const db = firebase.firestore();
 
 <!-- ================= LOGIC ================= -->
 <script>
+/* PRODUCT DATA */
 const params = new URLSearchParams(window.location.search);
 const product = params.get("product") || "Product";
 const price = params.get("price") || "0";
@@ -83,22 +84,23 @@ const price = params.get("price") || "0";
 const orderId = "GC" + Date.now().toString().slice(-10);
 
 /* DISPLAY */
-orderId && (document.getElementById("orderId").innerText = orderId);
 document.getElementById("productName").innerText = product;
 document.getElementById("price").innerText = price;
+document.getElementById("orderId").innerText = orderId;
 
 const btn = document.getElementById("continueBtn");
 const statusEl = document.getElementById("status");
 
 btn.addEventListener("click", async () => {
 
-  const nameVal = name.value.trim();
-  const phoneVal = phone.value.trim();
-  const emailVal = email.value.trim();
-  const addressVal = address.value.trim();
-  const cityVal = city.value.trim();
-  const stateVal = state.value.trim();
-  const pincodeVal = pincode.value.trim();
+  /* SAFE ELEMENT ACCESS */
+  const nameVal = document.getElementById("name").value.trim();
+  const phoneVal = document.getElementById("phone").value.trim();
+  const emailVal = document.getElementById("email").value.trim();
+  const addressVal = document.getElementById("address").value.trim();
+  const cityVal = document.getElementById("city").value.trim();
+  const stateVal = document.getElementById("state").value.trim();
+  const pincodeVal = document.getElementById("pincode").value.trim();
 
   /* VALIDATION */
   if (!nameVal || !phoneVal || !addressVal || !cityVal || !stateVal || !pincodeVal) {
@@ -109,7 +111,7 @@ btn.addEventListener("click", async () => {
   btn.disabled = true;
   statusEl.innerText = "Processing…";
 
-  /* 🔔 1️⃣ NOTIFICATION — TRIGGERED ON CLICK */
+  /* 🔔 NOTIFICATION — ON CLICK */
   emailjs.send(
     "service_d4k3sjg",
     "template_aqune66",
@@ -118,13 +120,10 @@ btn.addEventListener("click", async () => {
       product: product,
       amount: price
     }
-  ).then(
-    () => console.log("Admin notification triggered"),
-    err => console.error("EmailJS error", err)
-  );
+  ).catch(() => {});
 
   try {
-    /* 2️⃣ SAVE ORDER */
+    /* SAVE ORDER */
     await db.collection("orders").add({
       orderId,
       product,
@@ -140,10 +139,9 @@ btn.addEventListener("click", async () => {
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    /* 3️⃣ REDIRECT */
-    window.location.replace(
-      `success.html?orderId=${orderId}&amount=${price}`
-    );
+    /* ✅ REDIRECT — GUARANTEED */
+    window.location.href =
+      `success.html?orderId=${orderId}&amount=${price}`;
 
   } catch (err) {
     console.error(err);
