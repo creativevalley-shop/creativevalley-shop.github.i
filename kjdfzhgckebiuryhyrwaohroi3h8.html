@@ -12,6 +12,14 @@
   <p>Admin Panel • Orders</p>
 </header>
 
+<!-- TOGGLE -->
+<div class="admin-toggle">
+  <label>
+    <input type="checkbox" id="showProcessed">
+    Show processed orders
+  </label>
+</div>
+
 <main>
   <div id="orders"></div>
 </main>
@@ -32,69 +40,84 @@ const db = firebase.firestore();
 <!-- ================= ADMIN LOGIC ================= -->
 <script>
 const ordersDiv = document.getElementById("orders");
+const showProcessedCheckbox = document.getElementById("showProcessed");
 
 db.collection("orders")
   .orderBy("createdAt", "desc")
   .onSnapshot(snapshot => {
-    ordersDiv.innerHTML = "";
-
-    snapshot.forEach(doc => {
-      const o = doc.data();
-      if (o.status !== "PENDING") return;
-
-      const div = document.createElement("div");
-      div.className = "card admin-card";
-
-      div.innerHTML = `
-        <h3>${o.orderId}</h3>
-        <p class="amount">₹${o.amount}</p>
-
-        <div class="copy-grid">
-          <button onclick="copyText('${o.customerName}')">👤 Name</button>
-          <button onclick="copyText('${o.phone}')">📞 Phone</button>
-          <button onclick="copyText('${o.address}')">🏠 Address</button>
-          <button onclick="copyText('${o.city}')">📍 City</button>
-          <button onclick="copyText('${o.state}')">🧭 State</button>
-          <button onclick="copyText('${o.pincode}')">🔢 Pincode</button>
-        </div>
-
-        <button class="copy-full"
-          onclick="copyText(
-            'Name: ${o.customerName}\\nPhone: ${o.phone}\\nAddress: ${o.address}\\nCity: ${o.city}\\nState: ${o.state}\\nPincode: ${o.pincode}'
-          )">
-          📋 Copy Full Address
-        </button>
-
-        <button class="process"
-          onclick="processOrder(
-            '${doc.id}',
-            '${o.customerName}',
-            '${o.phone}',
-            '${o.orderId}'
-          )">
-          ⚡ PROCESS ORDER
-        </button>
-      `;
-
-      ordersDiv.appendChild(div);
-    });
+    render(snapshot);
   });
 
-/* COPY HELPER */
+showProcessedCheckbox.addEventListener("change", () => {
+  db.collection("orders")
+    .orderBy("createdAt", "desc")
+    .get()
+    .then(render);
+});
+
+function render(snapshot) {
+  ordersDiv.innerHTML = "";
+  const showProcessed = showProcessedCheckbox.checked;
+
+  snapshot.forEach(doc => {
+    const o = doc.data();
+    if (!showProcessed && o.status !== "PENDING") return;
+
+    const div = document.createElement("div");
+    div.className = "card admin-card";
+
+    div.innerHTML = `
+      <h3>${o.orderId}</h3>
+      <p class="amount">₹${o.amount}</p>
+
+      <div class="copy-grid">
+        <button onclick="copyText('${o.customerName}')">👤 Name</button>
+        <button onclick="copyText('${o.phone}')">📞 Phone</button>
+        <button onclick="copyText('${o.address}')">🏠 Address</button>
+        <button onclick="copyText('${o.city}')">📍 City</button>
+        <button onclick="copyText('${o.state}')">🧭 State</button>
+        <button onclick="copyText('${o.pincode}')">🔢 Pincode</button>
+      </div>
+
+      <button class="copy-full"
+        onclick="copyText(
+          'Name: ${o.customerName}\\nPhone: ${o.phone}\\nAddress: ${o.address}\\nCity: ${o.city}\\nState: ${o.state}\\nPincode: ${o.pincode}'
+        )">
+        📋 Copy Full Address
+      </button>
+
+      <button class="process"
+        onclick="processOrder(
+          '${doc.id}',
+          '${o.customerName}',
+          '${o.phone}',
+          '${o.orderId}'
+        )">
+        ⚡ PROCESS ORDER
+      </button>
+    `;
+
+    ordersDiv.appendChild(div);
+  });
+}
+
+/* COPY */
 function copyText(text) {
   navigator.clipboard.writeText(text)
-    .then(() => console.log("Copied:", text))
-    .catch(() => alert("Clipboard permission required"));
+    .then(() => console.log("Copied"))
+    .catch(() => alert("Clipboard permission needed"));
 }
 
 /* ONE-CLICK PROCESS */
 function processOrder(id, name, phone, orderId) {
 
   // Mark PAID
-  db.collection("orders").doc(id).update({ status: "PAID" });
+  db.collection("orders").doc(id).update({
+    status: "PAID"
+  });
 
   // WhatsApp message
-  const message =
+  const msg =
 `Hello ${name},
 
 Payment received for your order ✅
@@ -104,7 +127,7 @@ Your order is being processed.
 Thank you for shopping with us 🙂`;
 
   window.open(
-    "https://wa.me/91" + phone + "?text=" + encodeURIComponent(message),
+    "https://wa.me/91" + phone + "?text=" + encodeURIComponent(msg),
     "_blank"
   );
 }
