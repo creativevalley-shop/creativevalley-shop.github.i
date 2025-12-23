@@ -1,92 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Complete Payment</title>
-  <link rel="stylesheet" href="assets/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Order Successful</title>
+
+<style>
+body {
+  margin: 0;
+  background: #f8fafc;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #111827;
+}
+header {
+  background: #16a34a;
+  color: #fff;
+  text-align: center;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.wrap {
+  max-width: 420px;
+  margin: auto;
+  padding: 20px;
+}
+.card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.08);
+  text-align: center;
+}
+.icon {
+  font-size: 52px;
+}
+h1 {
+  font-size: 24px;
+  margin: 10px 0 6px;
+}
+.sub {
+  font-size: 14px;
+  color: #4b5563;
+  margin-bottom: 18px;
+}
+.details {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 18px;
+  text-align: left;
+  font-size: 14px;
+}
+.note {
+  background: #ecfdf5;
+  color: #065f46;
+  font-size: 13px;
+  padding: 14px;
+  border-radius: 14px;
+  margin-bottom: 18px;
+}
+a.btn {
+  display: block;
+  text-decoration: none;
+  padding: 15px;
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 10px;
+}
+.whatsapp { background: #25D366; color: #fff; }
+.save { background: #111; color: #fff; }
+footer {
+  text-align: center;
+  font-size: 12px;
+  color: #6b7280;
+  padding: 16px;
+}
+</style>
 </head>
+
 <body>
 
-<header class="top">
-  <p>Complete Your Payment</p>
-</header>
+<header>✅ Order Received</header>
 
-<main>
-  <div class="card success">
+<div class="wrap">
+<div class="card">
 
-    <h1>Almost Done 🎉</h1>
+<div class="icon">🎉</div>
 
-    <p class="order-box">
-      <span>Order ID</span>
-      <strong id="orderId">----</strong>
-    </p>
+<h1>Thank you!</h1>
+<p class="sub">Your order has been placed successfully.</p>
 
-    <p class="amount">
-      Amount to Pay: <b>₹<span id="amount">0</span></b>
-    </p>
-
-    <p class="note">
-      Please ensure the <b>Order ID</b> is visible in the UPI note
-      before completing payment.
-    </p>
-
-    <button id="payNow" class="primary big">
-      Pay Now via UPI
-    </button>
-
-    <p class="note">
-      Your order will be confirmed after payment verification.<br>
-      We will contact you on your registered mobile number or email.
-    </p>
-
-    <hr>
-
-   <div class="save-contact">
-
-  <p><b>📞 Save Our Number</b></p>
-
-  <p class="small">
-    To receive order updates, please save our support number.
-  </p>
-
-  <!-- SAVE CONTACT -->
-  <a href="earmuffs-store.vcf" download>
-    <button class="secondary">Save Contact</button>
-  </a>
-
-  <p class="small">
-    After download, tap the file and choose “Save Contact”.
-  </p>
-
-  <!-- CALL OPTION (BOOSTS SAVE RATE) -->
-  <a href="tel:+917381749483">
-    <button class="secondary">📞 Call Support</button>
-  </a>
-
+<div class="details">
+  <div><b>Order ID:</b> <span id="orderId"></span></div>
+  <div><b>Payment Mode:</b> UPI (Prepaid)</div>
+  <div><b>Status:</b> Confirmation on WhatsApp</div>
 </div>
 
+<div class="note">
+📲 Order confirmation will be sent on WhatsApp shortly.<br>
+Please save our number for updates.
+</div>
 
-  </div>
-</main>
+<a id="whatsappBtn" class="btn whatsapp" target="_blank">
+Open WhatsApp Confirmation
+</a>
+
+<a id="saveContactBtn" class="btn save" download="Store-Contact.vcf">
+Save WhatsApp Contact
+</a>
+
+</div>
+</div>
 
 <footer>
-  Thank you for shopping with us
+Need help? Contact us on WhatsApp.
 </footer>
 
 <script>
-const params = new URLSearchParams(window.location.search);
-const orderId = params.get("orderId");
-const amount = params.get("amount");
-
+/* GET ORDER ID */
+const params = new URLSearchParams(location.search);
+const orderId = params.get("orderId") || "N/A";
 document.getElementById("orderId").innerText = orderId;
-document.getElementById("amount").innerText = amount;
 
-document.getElementById("payNow").onclick = () => {
-  const note = encodeURIComponent(orderId);
-  window.location.href =
-    `upi://pay?pa=7381749483@okbizaxis&pn=Payment&am=${amount}&cu=INR&tn=${note}`;
-};
+/* 🔴 CHANGE THESE DETAILS */
+const supportNumber = "917381749483"; // WhatsApp number with country code
+const businessName = "KM Store";
+
+/* WHATSAPP MESSAGE */
+const message =
+  `Hello 👋%0A%0AMy order has been placed successfully.%0AOrder ID: ${orderId}%0A%0APlease confirm my order.`;
+
+document.getElementById("whatsappBtn").href =
+  `https://wa.me/${supportNumber}?text=${message}`;
+
+/* VCF CONTACT FILE */
+const vcfData = `
+BEGIN:VCARD
+VERSION:3.0
+FN:${businessName}
+ORG:${businessName}
+TEL;TYPE=CELL:+${supportNumber}
+END:VCARD
+`;
+
+const blob = new Blob([vcfData.trim()], { type: "text/vcard" });
+const url = URL.createObjectURL(blob);
+document.getElementById("saveContactBtn").href = url;
 </script>
 
 </body>
