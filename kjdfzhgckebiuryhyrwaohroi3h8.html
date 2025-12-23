@@ -164,7 +164,39 @@ Thank you for your understanding.`;
     "https://wa.me/91" + phone + "?text=" + encodeURIComponent(msg),
     "_blank"
   );
+} function rejectOrder(id, name, phone, orderId) {
+
+  const reason = prompt(
+    "Enter reject reason (e.g. Payment not found / Out of stock):"
+  );
+
+  if (!reason) return;
+
+  // 1️⃣ Update status in Firestore
+  db.collection("orders").doc(id).update({
+    status: "REJECTED",
+    rejectNote: reason
+  });
+
+  // 2️⃣ WhatsApp reject message
+  const msg =
+`Hello ${name},
+
+We could not process your order (Order ID: ${orderId}).
+
+Reason: ${reason}
+
+If payment has already been made, please share the UPI transaction reference or screenshot.
+We will assist you further.
+
+Thank you for your understanding.`;
+
+  window.open(
+    "https://wa.me/91" + phone + "?text=" + encodeURIComponent(msg),
+    "_blank"
+  );
 }
+
 </script>
 
 </body>
