@@ -1,127 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Secure Checkout</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Secure Checkout</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-    }
+<style>
+  body {
+    margin: 0;
+    background: #f8fafc;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #111827;
+  }
 
-    body {
-      margin: 0;
-      background: #f4f6f8;
-      color: #222;
-    }
+  header {
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 12px;
+    text-align: center;
+    font-size: 13px;
+    color: #374151;
+  }
 
-    header {
-      background: #111;
-      color: #fff;
-      text-align: center;
-      padding: 12px;
-      font-size: 14px;
-    }
+  .wrap {
+    max-width: 420px;
+    margin: auto;
+    padding: 16px;
+  }
 
-    main {
-      display: flex;
-      justify-content: center;
-      padding: 20px;
-    }
+  .card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+  }
 
-    .checkout-card {
-      background: #fff;
-      max-width: 420px;
-      width: 100%;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 10px 25px rgba(0,0,0,.08);
-    }
+  h1 {
+    font-size: 22px;
+    margin-bottom: 6px;
+  }
 
-    h1 {
-      font-size: 22px;
-      margin-bottom: 8px;
-    }
+  .order {
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 12px;
+  }
 
-    .order-id {
-      font-size: 13px;
-      color: #666;
-      margin-bottom: 16px;
-    }
+  .summary {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 18px;
+  }
 
-    .summary {
-      background: #f9fafb;
-      padding: 14px;
-      border-radius: 10px;
-      margin-bottom: 18px;
-    }
+  .summary h3 {
+    margin: 0;
+    font-size: 16px;
+  }
 
-    .summary h3 {
-      margin: 0 0 6px;
-      font-size: 16px;
-    }
+  .summary .price {
+    font-size: 18px;
+    font-weight: 700;
+    margin-top: 4px;
+  }
 
-    .price {
-      font-size: 20px;
-      font-weight: 700;
-      color: #16a34a;
-    }
+  h4 {
+    font-size: 14px;
+    margin: 16px 0 6px;
+  }
 
-    input {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 12px;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-      font-size: 14px;
-    }
+  input {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid #d1d5db;
+    margin-bottom: 10px;
+    font-size: 14px;
+  }
 
-    input:focus {
-      outline: none;
-      border-color: #111;
-    }
+  input:focus {
+    outline: none;
+    border-color: #111827;
+  }
 
-    .note {
-      font-size: 12px;
-      color: #555;
-      margin: 10px 0;
-      background: #fff7ed;
-      padding: 10px;
-      border-radius: 8px;
-    }
+  .note {
+    font-size: 12px;
+    color: #6b7280;
+    margin: 10px 0;
+  }
 
-    button {
-      width: 100%;
-      padding: 14px;
-      background: #111;
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-    }
+  button {
+    width: 100%;
+    padding: 16px;
+    font-size: 16px;
+    border-radius: 14px;
+    border: none;
+    background: #000000;
+    color: #ffffff;
+    font-weight: 600;
+    cursor: pointer;
+  }
 
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
+  button:disabled {
+    opacity: 0.7;
+  }
 
-    .status {
-      text-align: center;
-      margin-top: 10px;
-      font-size: 14px;
-    }
+  .status {
+    margin-top: 10px;
+    font-size: 13px;
+    text-align: center;
+    color: #374151;
+  }
 
-    footer {
-      text-align: center;
-      font-size: 13px;
-      padding: 15px;
-      color: #666;
-    }
-  </style>
+  .fallback {
+    font-size: 12px;
+    color: #6b7280;
+    text-align: center;
+    margin-top: 12px;
+  }
+
+  footer {
+    text-align: center;
+    font-size: 12px;
+    color: #6b7280;
+    padding: 16px;
+  }
+</style>
 </head>
 
 <body>
@@ -130,59 +135,62 @@
   🔒 Secure Checkout • Prepaid Orders Only
 </header>
 
-<main>
-  <div class="checkout-card">
+<div class="wrap">
+  <div class="card">
 
     <h1>Checkout</h1>
-    <div class="order-id">
-      Order ID: <b><span id="orderId"></span></b>
-    </div>
+    <p class="order">
+      Order ID: <b id="orderId"></b>
+    </p>
 
     <div class="summary">
       <h3 id="productName"></h3>
       <div class="price">₹<span id="price"></span></div>
     </div>
 
-    <!-- CUSTOMER -->
-    <input id="name" type="text" placeholder="Full Name *">
-    <input id="phone" type="tel" placeholder="Mobile Number *">
-    <input id="email" type="email" placeholder="Email (optional)">
+    <h4>Contact Details</h4>
+    <input id="name" placeholder="Full Name *">
+    <input id="phone" placeholder="Mobile Number *">
+    <input id="email" placeholder="Email (optional)">
 
-    <!-- ADDRESS -->
-    <input id="address" type="text" placeholder="House / Street / Area *">
-    <input id="city" type="text" placeholder="City *">
-    <input id="state" type="text" placeholder="State *">
-    <input id="pincode" type="number" placeholder="Pincode *">
+    <h4>Delivery Address</h4>
+    <input id="address" placeholder="House / Street / Area *">
+    <input id="city" placeholder="City *">
+    <input id="state" placeholder="State *">
+    <input id="pincode" placeholder="Pincode *">
 
-    <div class="note">
-      ⚠️ This is a <b>prepaid order</b>. Your order will be confirmed after payment verification.
-    </div>
+    <p class="note">
+      Your order will be confirmed after payment verification.
+    </p>
 
     <button id="continueBtn">
-      Continue to Payment
+      Pay ₹<span id="payAmount"></span>
     </button>
 
-    <div id="status" class="status"></div>
+    <p id="status" class="status"></p>
+
+    <p class="fallback">
+      If payment app doesn’t open, pay to<br>
+      <b>7381749483@okbizaxis</b><br>
+      and mention Order ID <b id="oidText"></b>
+    </p>
 
   </div>
-</main>
+</div>
 
 <footer>
   Need help? Contact us via WhatsApp
 </footer>
 
-<!-- ================= EMAILJS ================= -->
+<!-- EMAILJS -->
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 <script>
-(function () {
-  emailjs.init("mlvIRvITsuSCGHJMH");
-})();
+emailjs.init("mlvIRvITsuSCGHJMH");
 </script>
 
-<!-- ================= FIREBASE ================= -->
+<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
 <script>
 firebase.initializeApp({
   apiKey: "AIzaSyAcokjcwR2WEiis__c61TuXEzYXhxUlKB8",
@@ -192,67 +200,72 @@ firebase.initializeApp({
 const db = firebase.firestore();
 </script>
 
-<!-- ================= LOGIC (UNCHANGED) ================= -->
 <script>
-const params = new URLSearchParams(window.location.search);
+/* PRODUCT DATA */
+const params = new URLSearchParams(location.search);
 const product = params.get("product") || "Product";
 const price = params.get("price") || "0";
 
-const orderId = "GC" + Date.now().toString().slice(-10);
+/* ORDER ID */
+const orderId = "ORD" + Date.now().toString().slice(-8);
 
+/* DISPLAY */
 document.getElementById("productName").innerText = product;
 document.getElementById("price").innerText = price;
 document.getElementById("orderId").innerText = orderId;
+document.getElementById("payAmount").innerText = price;
+document.getElementById("oidText").innerText = orderId;
 
 const btn = document.getElementById("continueBtn");
 const statusEl = document.getElementById("status");
 
-btn.addEventListener("click", async () => {
-  const nameVal = name.value.trim();
-  const phoneVal = phone.value.trim();
-  const emailVal = email.value.trim();
-  const addressVal = address.value.trim();
-  const cityVal = city.value.trim();
-  const stateVal = state.value.trim();
-  const pincodeVal = pincode.value.trim();
+/* UPI LINK */
+function upiLink(orderId, amount) {
+  return `upi://pay?pa=7381749483@okbizaxis&pn=MoneySprint&am=${amount}&cu=INR&tn=${encodeURIComponent(orderId)}`;
+}
 
-  if (!nameVal || !phoneVal || !addressVal || !cityVal || !stateVal || !pincodeVal) {
+btn.onclick = async () => {
+
+  if (!name.value || !phone.value || !address.value || !city.value || !state.value || !pincode.value) {
     alert("Please fill all required fields");
     return;
   }
 
   btn.disabled = true;
-  statusEl.innerText = "Processing…";
+  statusEl.innerText = "Saving order & opening payment app…";
 
+  /* SAVE ORDER */
+  await db.collection("orders").add({
+    orderId,
+    product,
+    amount: Number(price),
+    customerName: name.value,
+    phone: phone.value,
+    email: email.value || null,
+    address: address.value,
+    city: city.value,
+    state: state.value,
+    pincode: pincode.value,
+    status: "PENDING",
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  /* ADMIN EMAIL */
   emailjs.send("service_d4k3sjg","template_aqune66",{
     order_id: orderId,
-    product: product,
-    amount: price
+    product,
+    amount: price,
+    phone: phone.value
   }).catch(()=>{});
 
-  try {
-    await db.collection("orders").add({
-      orderId,
-      product,
-      amount: Number(price),
-      customerName: nameVal,
-      phone: phoneVal,
-      email: emailVal || null,
-      address: addressVal,
-      city: cityVal,
-      state: stateVal,
-      pincode: pincodeVal,
-      status: "PENDING",
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
+  /* OPEN UPI */
+  window.location.href = upiLink(orderId, price);
 
-    window.location.href = `success.html?orderId=${orderId}&amount=${price}`;
-
-  } catch (err) {
-    statusEl.innerText = "❌ Something went wrong. Please try again.";
-    btn.disabled = false;
-  }
-});
+  /* SUCCESS PAGE */
+  setTimeout(() => {
+    window.location.href = `success.html?orderId=${orderId}`;
+  }, 2000);
+};
 </script>
 
 </body>
