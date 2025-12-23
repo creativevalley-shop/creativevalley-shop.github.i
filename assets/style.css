@@ -291,6 +291,15 @@ footer {
   padding: 14px;
   margin-top: 10px;
   border-radius: 10px;
+}.reject {
+  width: 100%;
+  background: #dc2626;
+  color: white;
+  font-size: 14px;
+  padding: 12px;
+  border-radius: 10px;
+  margin-top: 8px;
 }
+
 
 
