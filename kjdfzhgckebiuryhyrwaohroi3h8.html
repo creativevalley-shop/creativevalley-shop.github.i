@@ -94,14 +94,15 @@ function render(snapshot) {
       </button>
 
       <button class="reject"
-        onclick="rejectOrder(
-          '${doc.id}',
-          '${o.customerName}',
-          '${o.phone}',
-          '${o.orderId}'
-        )">
-        ❌ REJECT ORDER
-      </button>
+  onclick="rejectOrder(
+    '${doc.id}',
+    '${o.customerName}',
+    '${o.phone}',
+    '${o.orderId}'
+  )">
+  ❌ REJECT ORDER
+</button>
+
     `;
 
     ordersDiv.appendChild(div);
