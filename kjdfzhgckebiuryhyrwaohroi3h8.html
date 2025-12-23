@@ -12,7 +12,6 @@
   <p>Admin Panel • Orders</p>
 </header>
 
-<!-- TOGGLE -->
 <div class="admin-toggle">
   <label>
     <input type="checkbox" id="showProcessed">
@@ -44,9 +43,7 @@ const showProcessedCheckbox = document.getElementById("showProcessed");
 
 db.collection("orders")
   .orderBy("createdAt", "desc")
-  .onSnapshot(snapshot => {
-    render(snapshot);
-  });
+  .onSnapshot(snapshot => render(snapshot));
 
 showProcessedCheckbox.addEventListener("change", () => {
   db.collection("orders")
@@ -95,6 +92,16 @@ function render(snapshot) {
         )">
         ⚡ PROCESS ORDER
       </button>
+
+      <button class="reject"
+        onclick="rejectOrder(
+          '${doc.id}',
+          '${o.customerName}',
+          '${o.phone}',
+          '${o.orderId}'
+        )">
+        ❌ REJECT ORDER
+      </button>
     `;
 
     ordersDiv.appendChild(div);
@@ -104,19 +111,13 @@ function render(snapshot) {
 /* COPY */
 function copyText(text) {
   navigator.clipboard.writeText(text)
-    .then(() => console.log("Copied"))
     .catch(() => alert("Clipboard permission needed"));
 }
 
-/* ONE-CLICK PROCESS */
+/* PROCESS ORDER */
 function processOrder(id, name, phone, orderId) {
+  db.collection("orders").doc(id).update({ status: "PAID" });
 
-  // Mark PAID
-  db.collection("orders").doc(id).update({
-    status: "PAID"
-  });
-
-  // WhatsApp message
   const msg =
 `Hello ${name},
 
@@ -125,6 +126,38 @@ Order ID: ${orderId}
 
 Your order is being processed.
 Thank you for shopping with us 🙂`;
+
+  window.open(
+    "https://wa.me/91" + phone + "?text=" + encodeURIComponent(msg),
+    "_blank"
+  );
+}
+
+/* REJECT ORDER */
+function rejectOrder(id, name, phone, orderId) {
+
+  const reason = prompt(
+    "Enter reject reason (e.g. Payment not found / Out of stock):"
+  );
+
+  if (!reason) return;
+
+  db.collection("orders").doc(id).update({
+    status: "REJECTED",
+    rejectNote: reason
+  });
+
+  const msg =
+`Hello ${name},
+
+We could not process your order (Order ID: ${orderId}).
+
+Reason: ${reason}
+
+If payment was already made, please share the UPI transaction reference or screenshot.
+We will assist you further.
+
+Thank you for your understanding.`;
 
   window.open(
     "https://wa.me/91" + phone + "?text=" + encodeURIComponent(msg),
