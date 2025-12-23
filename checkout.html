@@ -2,75 +2,118 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Checkout</title>
-  <link rel="stylesheet" href="assets/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f7f7f7;
+      margin: 0;
+    }
+
+    .wrap {
+      max-width: 420px;
+      margin: auto;
+      padding: 16px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    }
+
+    h1 {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+
+    .sub {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 16px;
+    }
+
+    .summary {
+      display: flex;
+      justify-content: space-between;
+      background: #f3f4f6;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      font-size: 15px;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      font-size: 14px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 16px;
+      background: #000;
+      color: #fff;
+      font-size: 16px;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+    }
+
+    .trust {
+      text-align: center;
+      font-size: 12px;
+      color: #666;
+      margin-top: 10px;
+    }
+  </style>
 </head>
+
 <body>
 
-<header class="top">
-  <p>Secure Checkout • Prepaid Orders Only</p>
-</header>
+<div class="wrap">
+  <div class="card">
 
-<main>
-  <div class="card checkout">
+    <h1>Checkout</h1>
+    <p class="sub">Complete your order securely</p>
 
-  <h1>Almost Yours ✨</h1>
-  <p class="sub">
-    Please share a few details to complete your order
-  </p>
+    <div class="summary">
+      <span id="product">Product</span>
+      <strong>₹<span id="price">0</span></strong>
+    </div>
 
-  <!-- ORDER SUMMARY -->
-  <div class="summary">
-    <span id="productName"></span>
-    <strong>₹<span id="price"></span></strong>
+    <!-- REQUIRED INFO -->
+    <input id="name" placeholder="Full Name">
+    <input id="phone" placeholder="Mobile Number">
+    <input id="address" placeholder="House / Street / Area">
+    <input id="city" placeholder="City">
+    <input id="state" placeholder="State">
+    <input id="pincode" placeholder="Pincode">
+
+    <button class="btn" id="payBtn">
+      Pay ₹<span id="btnPrice"></span> Securely
+    </button>
+
+    <p class="trust">
+      🔒 Secure UPI payment • Confirmation on WhatsApp
+    </p>
+
   </div>
-
-  <!-- STEP 1 -->
-  <h3 class="section-title">Contact Details</h3>
-
-  <input id="name" type="text" placeholder="Full Name">
-  <input id="phone" type="tel" placeholder="Mobile Number">
-
-  <!-- STEP 2 -->
-  <h3 class="section-title">Delivery Address</h3>
-
-  <input id="address" type="text" placeholder="House / Street / Area">
-  <div class="row">
-    <input id="city" type="text" placeholder="City">
-    <input id="state" type="text" placeholder="State">
-  </div>
-  <input id="pincode" type="number" placeholder="Pincode">
-
-  <!-- TRUST -->
-  <p class="trust">
-    🔒 Secure UPI payment • Order confirmed on WhatsApp
-  </p>
-
-  <!-- CTA -->
-  <button id="continueBtn" class="primary big">
-    Pay ₹<span id="priceBtn"></span> Securely
-  </button>
-
-  <p id="status" class="status"></p>
-
 </div>
 
-</main>
-
-<footer>
-  Need help? Contact us via WhatsApp
-</footer>
-
-<!-- ================= EMAILJS ================= -->
+<!-- EMAILJS -->
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 <script>
-(function () {
-  emailjs.init("mlvIRvITsuSCGHJMH");
-})();
+emailjs.init("mlvIRvITsuSCGHJMH");
 </script>
 
-<!-- ================= FIREBASE ================= -->
+<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
@@ -83,82 +126,57 @@ firebase.initializeApp({
 const db = firebase.firestore();
 </script>
 
-<!-- ================= LOGIC ================= -->
 <script>
 /* PRODUCT DATA */
-const params = new URLSearchParams(window.location.search);
+const params = new URLSearchParams(location.search);
 const product = params.get("product") || "Product";
 const price = params.get("price") || "0";
 
-/* ORDER ID */
-const orderId = "GC" + Date.now().toString().slice(-10);
-
-/* DISPLAY */
-document.getElementById("productName").innerText = product;
+document.getElementById("product").innerText = product;
 document.getElementById("price").innerText = price;
-document.getElementById("orderId").innerText = orderId;
+document.getElementById("btnPrice").innerText = price;
 
-const btn = document.getElementById("continueBtn");
-const statusEl = document.getElementById("status");
+const orderId = "ORD" + Date.now();
 
-btn.addEventListener("click", async () => {
+document.getElementById("payBtn").onclick = async () => {
 
-  /* SAFE ELEMENT ACCESS */
-  const nameVal = document.getElementById("name").value.trim();
-  const phoneVal = document.getElementById("phone").value.trim();
-  const emailVal = document.getElementById("email").value.trim();
-  const addressVal = document.getElementById("address").value.trim();
-  const cityVal = document.getElementById("city").value.trim();
-  const stateVal = document.getElementById("state").value.trim();
-  const pincodeVal = document.getElementById("pincode").value.trim();
+  const name = document.getElementById("name").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const address = document.getElementById("address").value.trim();
+  const city = document.getElementById("city").value.trim();
+  const state = document.getElementById("state").value.trim();
+  const pincode = document.getElementById("pincode").value.trim();
 
-  /* VALIDATION */
-  if (!nameVal || !phoneVal || !addressVal || !cityVal || !stateVal || !pincodeVal) {
-    alert("Please fill all required fields");
+  if (!name || !phone || !address || !city || !state || !pincode) {
+    alert("Please fill all details");
     return;
   }
 
-  btn.disabled = true;
-  statusEl.innerText = "Processing…";
+  // 🔔 ADMIN NOTIFICATION (ON CLICK)
+  emailjs.send("service_d4k3sjg", "template_aqune66", {
+    order_id: orderId,
+    product,
+    amount: price
+  });
 
-  /* 🔔 NOTIFICATION — ON CLICK */
-  emailjs.send(
-    "service_d4k3sjg",
-    "template_aqune66",
-    {
-      order_id: orderId,
-      product: product,
-      amount: price
-    }
-  ).catch(() => {});
+  // 💾 SAVE ORDER
+  await db.collection("orders").add({
+    orderId,
+    product,
+    amount: Number(price),
+    name,
+    phone,
+    address,
+    city,
+    state,
+    pincode,
+    status: "PENDING",
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
 
-  try {
-    /* SAVE ORDER */
-    await db.collection("orders").add({
-      orderId,
-      product,
-      amount: Number(price),
-      customerName: nameVal,
-      phone: phoneVal,
-      email: emailVal || null,
-      address: addressVal,
-      city: cityVal,
-      state: stateVal,
-      pincode: pincodeVal,
-      status: "PENDING",
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    /* ✅ REDIRECT — GUARANTEED */
-    window.location.href =
-      `success.html?orderId=${orderId}&amount=${price}`;
-
-  } catch (err) {
-    console.error(err);
-    statusEl.innerText = "❌ Something went wrong. Please try again.";
-    btn.disabled = false;
-  }
-});
+  // ✅ REDIRECT
+  location.href = `success.html?orderId=${orderId}`;
+};
 </script>
 
 </body>
