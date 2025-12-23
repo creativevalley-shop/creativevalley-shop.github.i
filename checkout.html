@@ -7,138 +7,126 @@
 
 <style>
   body {
-  margin: 0;
-  background: #f8fafc;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: #111827;
-}
+    margin: 0;
+    background: #f8fafc;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #111827;
+  }
 
-header {
-  background: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
-  padding: 12px;
-  text-align: center;
-  font-size: 13px;
-  color: #374151;
-}
+  header {
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 12px;
+    text-align: center;
+    font-size: 13px;
+    color: #374151;
+  }
 
-.wrap {
-  max-width: 420px;
-  margin: auto;
-  padding: 16px;
-}
+  .wrap {
+    max-width: 420px;
+    margin: auto;
+    padding: 16px;
+  }
 
-.card {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 22px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
-}
+  .card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+  }
 
-h1 {
-  font-size: 22px;
-  margin-bottom: 4px;
-}
+  h1 {
+    font-size: 22px;
+    margin-bottom: 6px;
+  }
 
-.sub {
-  font-size: 14px;
-  color: #6b7280;
-  margin-bottom: 16px;
-}
+  .order {
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 12px;
+  }
 
-/* PRODUCT SUMMARY */
-.summary {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #f9fafb;
-  padding: 14px;
-  border-radius: 12px;
-  margin-bottom: 18px;
-  border: 1px solid #e5e7eb;
-}
+  .summary {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 18px;
+  }
 
-.summary .name {
-  font-weight: 600;
-}
+  .summary h3 {
+    margin: 0;
+    font-size: 16px;
+  }
 
-.summary .price {
-  font-size: 18px;
-  font-weight: 700;
-}
+  .summary .price {
+    font-size: 18px;
+    font-weight: 700;
+    margin-top: 4px;
+  }
 
-/* HEADINGS */
-h3 {
-  font-size: 14px;
-  margin: 16px 0 6px;
-  color: #111827;
-}
+  h4 {
+    font-size: 14px;
+    margin: 16px 0 6px;
+  }
 
-/* INPUTS */
-input {
-  width: 100%;
-  padding: 14px;
-  border-radius: 12px;
-  border: 1px solid #d1d5db;
-  margin-bottom: 10px;
-  font-size: 14px;
-  background: #ffffff;
-}
+  input {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid #d1d5db;
+    margin-bottom: 10px;
+    font-size: 14px;
+    background: #ffffff;
+  }
 
-input:focus {
-  outline: none;
-  border-color: #111827;
-}
+  input:focus {
+    outline: none;
+    border-color: #111827;
+  }
 
-/* ROW */
-.row {
-  display: flex;
-  gap: 8px;
-}
+  .note {
+    font-size: 12px;
+    color: #6b7280;
+    margin: 10px 0;
+  }
 
-/* TRUST */
-.trust {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 12px;
-  font-size: 13px;
-  text-align: center;
-  color: #374151;
-  margin: 14px 0;
-}
+  button {
+    width: 100%;
+    padding: 16px;
+    font-size: 16px;
+    border-radius: 14px;
+    border: none;
+    background: #000000;
+    color: #ffffff;
+    font-weight: 600;
+    cursor: pointer;
+  }
 
-/* BUTTON */
-button {
-  width: 100%;
-  padding: 18px;
-  font-size: 16px;
-  border-radius: 14px;
-  border: none;
-  background: #000000;
-  color: #ffffff;
-  font-weight: 600;
-}
+  button:disabled {
+    opacity: 0.7;
+  }
 
-button:disabled {
-  opacity: 0.7;
-}
+  .status {
+    margin-top: 10px;
+    font-size: 13px;
+    text-align: center;
+    color: #374151;
+  }
 
-/* STATUS + FALLBACK */
-.status {
-  margin-top: 10px;
-  font-size: 13px;
-  text-align: center;
-  color: #374151;
-}
+  .fallback {
+    font-size: 12px;
+    color: #6b7280;
+    text-align: center;
+    margin-top: 12px;
+  }
 
-.fallback {
-  font-size: 12px;
-  color: #6b7280;
-  text-align: center;
-  margin-top: 12px;
-}
-
+  footer {
+    text-align: center;
+    font-size: 12px;
+    color: #6b7280;
+    padding: 16px;
+  }
 </style>
 </head>
 
@@ -151,38 +139,33 @@ button:disabled {
 <div class="wrap">
   <div class="card">
 
-    <h1>Almost Yours ✨</h1>
-    <p class="sub">Complete your order securely</p>
+    <h1>Checkout</h1>
+    <p class="order">
+      Order ID: <b id="orderId"></b>
+    </p>
 
     <div class="summary">
-      <div>
-        <div class="name" id="productName"></div>
-        <div style="font-size:12px;color:#666">
-          Order ID: <b id="orderId"></b>
-        </div>
-      </div>
+      <h3 id="productName"></h3>
       <div class="price">₹<span id="price"></span></div>
     </div>
 
-    <h3>Contact Details</h3>
+    <h4>Contact Details</h4>
     <input id="name" placeholder="Full Name *">
     <input id="phone" placeholder="Mobile Number *">
+    <input id="email" placeholder="Email (optional)">
 
-    <h3>Delivery Address</h3>
+    <h4>Delivery Address</h4>
     <input id="address" placeholder="House / Street / Area *">
-    <div class="row">
-      <input id="city" placeholder="City *">
-      <input id="state" placeholder="State *">
-    </div>
+    <input id="city" placeholder="City *">
+    <input id="state" placeholder="State *">
     <input id="pincode" placeholder="Pincode *">
 
-    <div class="trust">
-      🔒 Secure UPI payment<br>
-      📲 Confirmation on WhatsApp
-    </div>
+    <p class="note">
+      Your order will be confirmed after payment verification.
+    </p>
 
-    <button id="payBtn">
-      Pay ₹<span id="btnPrice"></span>
+    <button id="continueBtn">
+      Pay ₹<span id="payAmount"></span>
     </button>
 
     <p id="status" class="status"></p>
@@ -196,90 +179,99 @@ button:disabled {
   </div>
 </div>
 
-<!-- ================= EMAILJS ================= -->
+<footer>
+  Need help? Contact us via WhatsApp
+</footer>
+
+<!-- EMAILJS -->
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 <script>
 emailjs.init("mlvIRvITsuSCGHJMH");
 </script>
 
-<!-- ================= FIREBASE ================= -->
+<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
 <script>
 firebase.initializeApp({
-  apiKey:"AIzaSyAcokjcwR2WEiis__c61TuXEzYXhxUlKB8",
-  authDomain:"shop-template-7d574.firebaseapp.com",
-  projectId:"shop-template-7d574"
+  apiKey: "AIzaSyAcokjcwR2WEiis__c61TuXEzYXhxUlKB8",
+  authDomain: "shop-template-7d574.firebaseapp.com",
+  projectId: "shop-template-7d574"
 });
-const db=firebase.firestore();
+const db = firebase.firestore();
 </script>
 
 <script>
 /* PRODUCT DATA */
-const params=new URLSearchParams(location.search);
-const product=params.get("product")||"Product";
-const price=params.get("price")||"0";
-const orderId="ORD"+Date.now().toString().slice(-8);
+const params = new URLSearchParams(location.search);
+const product = params.get("product") || "Product";
+const price = params.get("price") || "0";
+
+/* ORDER ID */
+const orderId = "GC" + Date.now().toString().slice(-8);
 
 /* DISPLAY */
-productName.innerText=product;
-priceEl=price;
-price.innerText=price;
-btnPrice.innerText=price;
-orderIdEl=orderId;
-orderId.innerText=orderId;
-oidText.innerText=orderId;
+productName.innerText = product;
+priceEl = price;
+price.innerText = price;
+orderIdEl = orderId;
+orderId.innerText = orderId;
+payAmount.innerText = price;
+oidText.innerText = orderId;
 
-/* UPI LINK */
-function getUpiLink(orderId,amount){
+const btn = document.getElementById("continueBtn");
+const statusEl = document.getElementById("status");
+
+/* UPI DEEP LINK */
+function getUpiLink(orderId, amount) {
   return `upi://pay?pa=7381749483@okbizaxis&pn=MoneySprint&am=${amount}&cu=INR&tn=${encodeURIComponent(orderId)}`;
 }
 
-/* PAY FLOW */
-payBtn.onclick=async()=>{
-  if(!name.value||!phone.value||!address.value||!city.value||!state.value||!pincode.value){
-    alert("Please fill all required details");
+btn.onclick = async () => {
+
+  if (!name.value || !phone.value || !address.value || !city.value || !state.value || !pincode.value) {
+    alert("Please fill all required fields");
     return;
   }
 
-  payBtn.disabled=true;
-  status.innerText="Saving order & opening payment app…";
+  btn.disabled = true;
+  statusEl.innerText = "Saving order & opening payment app…";
 
-  // 1️⃣ SAVE ORDER
+  /* SAVE ORDER */
   await db.collection("orders").add({
     orderId,
     product,
-    amount:Number(price),
-    customerName:name.value,
-    phone:phone.value,
-    address:address.value,
-    city:city.value,
-    state:state.value,
-    pincode:pincode.value,
-    status:"PENDING",
-    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    amount: Number(price),
+    customerName: name.value,
+    phone: phone.value,
+    email: email.value || null,
+    address: address.value,
+    city: city.value,
+    state: state.value,
+    pincode: pincode.value,
+    status: "PENDING",
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
 
-  // 2️⃣ ADMIN NOTIFICATION (NON-BLOCKING)
+  /* ADMIN NOTIFICATION */
   emailjs.send(
     "service_d4k3sjg",
     "template_aqune66",
     {
-      order_id:orderId,
-      product:product,
-      amount:price,
-      phone:phone.value
+      order_id: orderId,
+      product: product,
+      amount: price,
+      phone: phone.value
     }
-  ).catch(()=>{});
+  ).catch(() => {});
 
-  // 3️⃣ OPEN UPI APP
-  window.location.href=getUpiLink(orderId,price);
+  /* OPEN UPI APP */
+  window.location.href = getUpiLink(orderId, price);
 
-  // 4️⃣ SUCCESS PAGE
-  setTimeout(()=>{
-    window.location.href=`success.html?orderId=${orderId}`;
-  },2000);
+  /* SUCCESS PAGE */
+  setTimeout(() => {
+    window.location.href = `success.html?orderId=${orderId}`;
+  }, 2000);
 };
 </script>
 
