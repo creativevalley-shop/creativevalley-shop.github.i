@@ -30,28 +30,15 @@ header {
   padding: 22px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.06);
 }
-h1 {
-  font-size: 22px;
-  margin-bottom: 6px;
-}
-.order {
-  font-size: 13px;
-  color: #6b7280;
-}
+h1 { font-size: 22px; }
+.order { font-size: 13px; color: #6b7280; }
 .summary {
   background: #f9fafb;
   border-radius: 12px;
   padding: 14px;
   margin-bottom: 18px;
 }
-.summary h3 {
-  margin: 0;
-  font-size: 16px;
-}
-.price {
-  font-size: 18px;
-  font-weight: 700;
-}
+.price { font-size: 18px; font-weight: 700; }
 input {
   width: 100%;
   padding: 14px;
@@ -68,59 +55,58 @@ button {
   color: #fff;
   font-weight: 600;
   font-size: 16px;
-  cursor: pointer;
 }
-button:disabled {
-  opacity: 0.6;
-}
+button:disabled { opacity: 0.6; }
 .status {
   text-align: center;
-  font-size: 13px;
-  margin-top: 10px;
+  font-size: 14px;
+  margin-top: 12px;
 }
-footer {
-  text-align: center;
-  font-size: 12px;
-  color: #6b7280;
-  padding: 16px;
+.loader {
+  margin: 12px auto;
+  border: 4px solid #e5e7eb;
+  border-top: 4px solid #000;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  100% { transform: rotate(360deg); }
 }
 </style>
 </head>
 
 <body>
 
-<header>
-  🔒 Secure Checkout • Prepaid Orders Only
-</header>
+<header>🔒 Secure Checkout • Prepaid Orders Only</header>
 
 <div class="wrap">
-  <div class="card">
+<div class="card">
 
-    <h1>Checkout</h1>
-    <p class="order">Order ID: <b id="orderId"></b></p>
+<h1>Checkout</h1>
+<p class="order">Order ID: <b id="orderId"></b></p>
 
-    <div class="summary">
-      <h3 id="productName"></h3>
-      <div class="price">₹<span id="priceText"></span></div>
-    </div>
-
-    <input id="name" placeholder="Full Name *">
-    <input id="phone" placeholder="Mobile Number *">
-    <input id="email" placeholder="Email (optional)">
-    <input id="address" placeholder="House / Street / Area *">
-    <input id="city" placeholder="City *">
-    <input id="state" placeholder="State *">
-    <input id="pincode" placeholder="Pincode *">
-
-    <button id="payBtn">Pay ₹<span id="payAmount"></span></button>
-    <p id="status" class="status"></p>
-
-  </div>
+<div class="summary">
+  <h3 id="productName"></h3>
+  <div class="price">₹<span id="priceText"></span></div>
 </div>
 
-<footer>
-  Need help? Contact us on WhatsApp
-</footer>
+<input id="name" placeholder="Full Name *">
+<input id="phone" placeholder="Mobile Number *">
+<input id="email" placeholder="Email (optional)">
+<input id="address" placeholder="House / Street *">
+<input id="city" placeholder="City *">
+<input id="state" placeholder="State *">
+<input id="pincode" placeholder="Pincode *">
+
+<button id="payBtn">Pay ₹<span id="payAmount"></span></button>
+
+<div id="status" class="status"></div>
+<div id="loader" style="display:none" class="loader"></div>
+
+</div>
+</div>
 
 <!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -135,43 +121,40 @@ const db = firebase.firestore();
 </script>
 
 <script>
-/* PRODUCT DATA */
 const params = new URLSearchParams(location.search);
 const productName = params.get("product") || "Product";
 const amount = params.get("price") || "0";
-
-/* ORDER ID */
 const orderId = "ORD" + Date.now().toString().slice(-8);
 
-/* DISPLAY */
-document.getElementById("productName").innerText = productName;
-document.getElementById("priceText").innerText = amount;
-document.getElementById("payAmount").innerText = amount;
-document.getElementById("orderId").innerText = orderId;
+productNameEl = document.getElementById("productName");
+priceTextEl = document.getElementById("priceText");
+payAmountEl = document.getElementById("payAmount");
+orderIdEl = document.getElementById("orderId");
+
+productNameEl.innerText = productName;
+priceTextEl.innerText = amount;
+payAmountEl.innerText = amount;
+orderIdEl.innerText = orderId;
 
 const btn = document.getElementById("payBtn");
 const statusEl = document.getElementById("status");
+const loader = document.getElementById("loader");
 
-/* TELEGRAM BOT */
-function sendTelegramNotification(message) {
-  const BOT_TOKEN = "8519147037:AAGXDo9ku4iOP6X6F2jQxnME08WwctUjoj0";
-  const CHAT_ID = "5820261983";
-
+/* TELEGRAM */
+function sendTelegramNotification(msg) {
   fetch(
-    `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(message)}`
-  ).catch(() => {});
+    `https://api.telegram.org/bot8519147037:AAGXDo9ku4iOP6X6F2jQxnME08WwctUjoj0/sendMessage?chat_id=5820261983&text=${encodeURIComponent(msg)}`
+  ).catch(()=>{});
 }
 
-/* UPI LINK */
-function getUpiLink(orderId, amount) {
+/* UPI */
+function upiLink(orderId, amount) {
   return `upi://pay?pa=7381749483@okbizaxis&pn=StorePayment&am=${amount}&cu=INR&tn=${orderId}`;
 }
 
 btn.onclick = async () => {
-
   const name = document.getElementById("name").value.trim();
   const phone = document.getElementById("phone").value.trim();
-  const email = document.getElementById("email").value.trim();
   const address = document.getElementById("address").value.trim();
   const city = document.getElementById("city").value.trim();
   const state = document.getElementById("state").value.trim();
@@ -183,7 +166,8 @@ btn.onclick = async () => {
   }
 
   btn.disabled = true;
-  statusEl.innerText = "Saving order & opening payment app…";
+  statusEl.innerText = "Processing payment… Please wait";
+  loader.style.display = "block";
 
   await db.collection("orders").add({
     orderId,
@@ -191,7 +175,6 @@ btn.onclick = async () => {
     amount: Number(amount),
     customerName: name,
     phone,
-    email: email || null,
     address,
     city,
     state,
@@ -200,22 +183,24 @@ btn.onclick = async () => {
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
 
-  /* TELEGRAM NOTIFICATION */
   sendTelegramNotification(
 `🛒 NEW ORDER
-🆔 Order ID: ${orderId}
-📦 Product: ${productName}
-💰 Amount: ₹${amount}
-📞 Phone: ${phone}`
+🆔 ${orderId}
+📦 ${productName}
+💰 ₹${amount}
+📞 ${phone}`
   );
 
-  /* OPEN UPI */
-  window.location.href = getUpiLink(orderId, amount);
-
-  /* SUCCESS PAGE */
+  /* ⏳ 15 SECOND PROCESSING */
   setTimeout(() => {
-    window.location.href = `success.html?orderId=${orderId}`;
-  }, 2000);
+    statusEl.innerText = "Opening payment app…";
+    window.location.href = upiLink(orderId, amount);
+
+    setTimeout(() => {
+      window.location.href = `success.html?orderId=${orderId}`;
+    }, 2000);
+
+  }, 15000);
 };
 </script>
 
