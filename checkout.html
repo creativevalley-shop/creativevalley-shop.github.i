@@ -112,29 +112,16 @@ button:disabled { opacity: 0.6; }
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-firebase.initializeApp({
-  apiKey: "AIzaSyAcokjcwR2WEiis__c61TuXEzYXhxUlKB8",
-  authDomain: "shop-template-7d574.firebaseapp.com",
-  projectId: "shop-template-7d574"
-});
-const db = firebase.firestore();
-</script>
-
-<script>
 const params = new URLSearchParams(location.search);
 const productName = params.get("product") || "Product";
 const amount = params.get("price") || "0";
 const orderId = "ORD" + Date.now().toString().slice(-8);
 
-productNameEl = document.getElementById("productName");
-priceTextEl = document.getElementById("priceText");
-payAmountEl = document.getElementById("payAmount");
-orderIdEl = document.getElementById("orderId");
-
-productNameEl.innerText = productName;
-priceTextEl.innerText = amount;
-payAmountEl.innerText = amount;
-orderIdEl.innerText = orderId;
+/* DISPLAY */
+document.getElementById("productName").innerText = productName;
+document.getElementById("priceText").innerText = amount;
+document.getElementById("payAmount").innerText = amount;
+document.getElementById("orderId").innerText = orderId;
 
 const btn = document.getElementById("payBtn");
 const statusEl = document.getElementById("status");
@@ -147,12 +134,13 @@ function sendTelegramNotification(msg) {
   ).catch(()=>{});
 }
 
-/* UPI */
+/* UPI LINK */
 function upiLink(orderId, amount) {
   return `upi://pay?pa=7381749483@okbizaxis&pn=StorePayment&am=${amount}&cu=INR&tn=${orderId}`;
 }
 
 btn.onclick = async () => {
+
   const name = document.getElementById("name").value.trim();
   const phone = document.getElementById("phone").value.trim();
   const address = document.getElementById("address").value.trim();
@@ -169,6 +157,7 @@ btn.onclick = async () => {
   statusEl.innerText = "Processing payment… Please wait";
   loader.style.display = "block";
 
+  /* SAVE ORDER */
   await db.collection("orders").add({
     orderId,
     product: productName,
@@ -183,6 +172,7 @@ btn.onclick = async () => {
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
 
+  /* TELEGRAM NOTIFY (INSTANT) */
   sendTelegramNotification(
 `🛒 NEW ORDER
 🆔 ${orderId}
@@ -191,18 +181,16 @@ btn.onclick = async () => {
 📞 ${phone}`
   );
 
-  /* ⏳ 15 SECOND PROCESSING */
+  /* 🔥 OPEN UPI APP IMMEDIATELY */
+  window.location.href = upiLink(orderId, amount);
+
+  /* ⏳ KEEP PROCESSING FOR 15 SECONDS */
   setTimeout(() => {
-    statusEl.innerText = "Opening payment app…";
-    window.location.href = upiLink(orderId, amount);
-
-    setTimeout(() => {
-      window.location.href = `success.html?orderId=${orderId}`;
-    }, 2000);
-
+    window.location.href = `success.html?orderId=${orderId}`;
   }, 15000);
 };
 </script>
+
 
 </body>
 </html>
