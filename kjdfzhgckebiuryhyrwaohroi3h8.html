@@ -1,32 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Admin Panel</title>
-  <link rel="stylesheet" href="assets/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Secure Checkout</title>
+
+<style>
+body {
+  margin: 0;
+  background: #f8fafc;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #111827;
+}
+header {
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 12px;
+  text-align: center;
+  font-size: 13px;
+}
+.wrap {
+  max-width: 420px;
+  margin: auto;
+  padding: 16px;
+}
+.card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+}
+h1 {
+  font-size: 22px;
+  margin-bottom: 6px;
+}
+.order {
+  font-size: 13px;
+  color: #6b7280;
+}
+.summary {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 18px;
+}
+.summary h3 {
+  margin: 0;
+  font-size: 16px;
+}
+.price {
+  font-size: 18px;
+  font-weight: 700;
+}
+input {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+  margin-bottom: 10px;
+}
+button {
+  width: 100%;
+  padding: 16px;
+  border-radius: 14px;
+  border: none;
+  background: #000;
+  color: #fff;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+}
+button:disabled {
+  opacity: 0.6;
+}
+.status {
+  text-align: center;
+  font-size: 14px;
+  margin-top: 12px;
+}
+.loader {
+  margin: 12px auto;
+  border: 4px solid #e5e7eb;
+  border-top: 4px solid #000;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
+footer {
+  text-align: center;
+  font-size: 12px;
+  color: #6b7280;
+  padding: 16px;
+}
+</style>
 </head>
+
 <body>
 
-<header class="top">
-  <p>Admin Panel • Orders</p>
+<header>
+  🔒 Secure Checkout • Prepaid Orders Only
 </header>
 
-<div class="admin-toggle">
-  <label>
-    <input type="checkbox" id="showProcessed">
-    Show processed orders
-  </label>
+<div class="wrap">
+  <div class="card">
+
+    <h1>Checkout</h1>
+    <p class="order">Order ID: <b id="orderId"></b></p>
+
+    <div class="summary">
+      <h3 id="productName"></h3>
+      <div class="price">₹<span id="priceText"></span></div>
+    </div>
+
+    <input id="name" placeholder="Full Name *">
+    <input id="phone" placeholder="Mobile Number *">
+    <input id="email" placeholder="Email (optional)">
+    <input id="address" placeholder="House / Street / Area *">
+    <input id="city" placeholder="City *">
+    <input id="state" placeholder="State *">
+    <input id="pincode" placeholder="Pincode *">
+
+    <button id="payBtn">Pay ₹<span id="payAmount"></span></button>
+
+    <div id="status" class="status"></div>
+    <div id="loader" class="loader" style="display:none"></div>
+
+  </div>
 </div>
 
-<main>
-  <div id="orders"></div>
-</main>
+<footer>
+  Need help? Contact us on WhatsApp
+</footer>
 
 <!-- ================= FIREBASE ================= -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
 <script>
 firebase.initializeApp({
   apiKey: "AIzaSyAcokjcwR2WEiis__c61TuXEzYXhxUlKB8",
@@ -36,167 +148,93 @@ firebase.initializeApp({
 const db = firebase.firestore();
 </script>
 
-<!-- ================= ADMIN LOGIC ================= -->
+<!-- ================= CHECKOUT LOGIC ================= -->
 <script>
-const ordersDiv = document.getElementById("orders");
-const showProcessedCheckbox = document.getElementById("showProcessed");
+/* PRODUCT DATA */
+const params = new URLSearchParams(location.search);
+const productName = params.get("product") || "Product";
+const amount = params.get("price") || "0";
 
-db.collection("orders")
-  .orderBy("createdAt", "desc")
-  .onSnapshot(snapshot => render(snapshot));
+/* ORDER ID */
+const orderId = "ORD" + Date.now().toString().slice(-8);
 
-showProcessedCheckbox.addEventListener("change", () => {
-  db.collection("orders")
-    .orderBy("createdAt", "desc")
-    .get()
-    .then(render);
-});
+/* DISPLAY */
+document.getElementById("productName").innerText = productName;
+document.getElementById("priceText").innerText = amount;
+document.getElementById("payAmount").innerText = amount;
+document.getElementById("orderId").innerText = orderId;
 
-function render(snapshot) {
-  ordersDiv.innerHTML = "";
-  const showProcessed = showProcessedCheckbox.checked;
+const btn = document.getElementById("payBtn");
+const statusEl = document.getElementById("status");
+const loader = document.getElementById("loader");
 
-  snapshot.forEach(doc => {
-    const o = doc.data();
-    if (!showProcessed && o.status !== "PENDING") return;
+/* TELEGRAM BOT (ADMIN NOTIFICATION) */
+function sendTelegramNotification(message) {
+  const BOT_TOKEN = "8519147037:AAGXDo9ku4iOP6X6F2jQxnME08WwctUjoj0";
+  const CHAT_ID = "5820261983";
 
-    const div = document.createElement("div");
-    div.className = "card admin-card";
-
-    div.innerHTML = `
-      <h3>${o.orderId}</h3>
-      <p class="amount">₹${o.amount}</p>
-
-      <div class="copy-grid">
-        <button onclick="copyText('${o.customerName}')">👤 Name</button>
-        <button onclick="copyText('${o.phone}')">📞 Phone</button>
-        <button onclick="copyText('${o.address}')">🏠 Address</button>
-        <button onclick="copyText('${o.city}')">📍 City</button>
-        <button onclick="copyText('${o.state}')">🧭 State</button>
-        <button onclick="copyText('${o.pincode}')">🔢 Pincode</button>
-      </div>
-
-      <button class="copy-full"
-        onclick="copyText(
-          'Name: ${o.customerName}\\nPhone: ${o.phone}\\nAddress: ${o.address}\\nCity: ${o.city}\\nState: ${o.state}\\nPincode: ${o.pincode}'
-        )">
-        📋 Copy Full Address
-      </button>
-
-      <button class="process"
-        onclick="processOrder(
-          '${doc.id}',
-          '${o.customerName}',
-          '${o.phone}',
-          '${o.orderId}'
-        )">
-        ⚡ PROCESS ORDER
-      </button>
-
-      <button class="reject"
-  onclick="rejectOrder(
-    '${doc.id}',
-    '${o.customerName}',
-    '${o.phone}',
-    '${o.orderId}'
-  )">
-  ❌ REJECT ORDER
-</button>
-
-    `;
-
-    ordersDiv.appendChild(div);
-  });
+  fetch(
+    `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(message)}`
+  ).catch(() => {});
 }
 
-/* COPY */
-function copyText(text) {
-  navigator.clipboard.writeText(text)
-    .catch(() => alert("Clipboard permission needed"));
+/* UPI LINK */
+function getUpiLink(orderId, amount) {
+  return `upi://pay?pa=7381749483@okbizaxis&pn=StorePayment&am=${amount}&cu=INR&tn=${orderId}`;
 }
 
-/* PROCESS ORDER */
-function processOrder(id, name, phone, orderId) {
-  db.collection("orders").doc(id).update({ status: "PAID" });
+btn.onclick = async () => {
 
-  const msg =
-`Hello ${name},
+  const name = document.getElementById("name").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const address = document.getElementById("address").value.trim();
+  const city = document.getElementById("city").value.trim();
+  const state = document.getElementById("state").value.trim();
+  const pincode = document.getElementById("pincode").value.trim();
 
-Payment received for your order ✅
-Order ID: ${orderId}
+  if (!name || !phone || !address || !city || !state || !pincode) {
+    alert("Please fill all required fields");
+    return;
+  }
 
-Your order is being processed.
-Thank you for shopping with us 🙂`;
+  btn.disabled = true;
+  statusEl.innerText = "Processing payment… Please wait";
+  loader.style.display = "block";
 
-  window.open(
-    "https://wa.me/91" + phone + "?text=" + encodeURIComponent(msg),
-    "_blank"
-  );
-}
-
-/* REJECT ORDER */
-function rejectOrder(id, name, phone, orderId) {
-
-  const reason = prompt(
-    "Enter reject reason (e.g. Payment not found / Out of stock):"
-  );
-
-  if (!reason) return;
-
-  db.collection("orders").doc(id).update({
-    status: "REJECTED",
-    rejectNote: reason
+  /* SAVE ORDER */
+  await db.collection("orders").add({
+    orderId,
+    product: productName,
+    amount: Number(amount),
+    customerName: name,
+    phone,
+    email: email || null,
+    address,
+    city,
+    state,
+    pincode,
+    status: "PENDING",
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
 
-  const msg =
-`Hello ${name},
-
-We could not process your order (Order ID: ${orderId}).
-
-Reason: ${reason}
-
-If payment was already made, please share the UPI transaction reference or screenshot.
-We will assist you further.
-
-Thank you for your understanding.`;
-
-  window.open(
-    "https://wa.me/91" + phone + "?text=" + encodeURIComponent(msg),
-    "_blank"
-  );
-} function rejectOrder(id, name, phone, orderId) {
-
-  const reason = prompt(
-    "Enter reject reason (e.g. Payment not found / Out of stock):"
+  /* TELEGRAM NOTIFICATION */
+  sendTelegramNotification(
+`🛒 NEW ORDER
+🆔 Order ID: ${orderId}
+📦 Product: ${productName}
+💰 Amount: ₹${amount}
+📞 Phone: ${phone}`
   );
 
-  if (!reason) return;
+  /* 🔥 OPEN UPI APP IMMEDIATELY */
+  window.location.href = getUpiLink(orderId, amount);
 
-  // 1️⃣ Update status in Firestore
-  db.collection("orders").doc(id).update({
-    status: "REJECTED",
-    rejectNote: reason
-  });
-
-  // 2️⃣ WhatsApp reject message
-  const msg =
-`Hello ${name},
-
-We could not process your order (Order ID: ${orderId}).
-
-Reason: ${reason}
-
-If payment has already been made, please share the UPI transaction reference or screenshot.
-We will assist you further.
-
-Thank you for your understanding.`;
-
-  window.open(
-    "https://wa.me/91" + phone + "?text=" + encodeURIComponent(msg),
-    "_blank"
-  );
-}
-
+  /* ⏳ SHOW PROCESSING FOR 15 SECONDS */
+  setTimeout(() => {
+    window.location.href = `success.html?orderId=${orderId}`;
+  }, 15000);
+};
 </script>
 
 </body>
